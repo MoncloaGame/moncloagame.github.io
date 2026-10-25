@@ -1,6 +1,7 @@
 /* Moncloa Game · red para la versión web (GitHub Pages)
    Imita la API de salas que usa el juego: claude.use("room") → join(nombre) → {peers, presence, onPeers, leave}
-   - Por defecto: PeerJS (WebRTC entre móviles, sin cuentas ni servidor propio).
+   - Por defecto: un servidor MQTT público (EMQX o HiveMQ) que guarda la sala aunque alguien salga un momento.
+   - Si no hay ningún servidor MQTT disponible: PeerJS (WebRTC directo entre móviles).
    - Opcional y más fiable: Firebase Realtime Database (rellena config.js).
    También ofrece claude.use("downloads") para guardar la imagen de invitación. */
 (function(){
@@ -41,6 +42,54 @@
           presence: async obj => { mine = JSON.stringify(obj); await me.set({ p: mine, t: Date.now() }); },
           onPeers: (f, e) => { cbs.push(f); if (e) errs.push(e); },
           leave: async () => { ref.off("value", onVal); await me.remove(); }
+        };
+      }
+    };
+  }
+
+  /* ---------- MQTT: cada jugador deja su estado «retenido» en la sala ---------- */
+  async function mqttRoom(){
+    if (!window.mqtt) await loadScript("https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js");
+    const URLS = (CFG.mqtt && CFG.mqtt.length) ? CFG.mqtt : ["wss://broker.emqx.io:8084/mqtt", "wss://broker.hivemq.com:8884/mqtt"];
+    function connectTo(url, opts){
+      return new Promise((ok, ko) => {
+        const c = window.mqtt.connect(url, opts); let done = false;
+        const fail = e => { if (done) return; done = true; try { c.end(true); } catch (x) {} ko(e || new Error("mqtt")); };
+        const t = setTimeout(() => fail(new Error("timeout")), 9000);
+        c.once("connect", () => { if (done) return; done = true; clearTimeout(t); ok(c); });
+        c.once("error", e => { clearTimeout(t); fail(e); });
+      });
+    }
+    // comprobamos que algún servidor responde antes de usar MQTT
+    let good = null;
+    for (const u of URLS) { try { const c = await connectTo(u, { clientId: "mgp_" + uid(), clean: true, reconnectPeriod: 0, connectTimeout: 8000 }); c.end(true); good = u; break; } catch (e) {} }
+    if (!good) throw new Error("sin servidor MQTT");
+    return {
+      async join(name){
+        const room = name.replace(/[^a-z0-9-]/gi, "");
+        const base = "moncloagame/v1/rooms/" + room + "/";
+        const key = uid();
+        const map = new Map(); let mine = null; const cbs = [], errs = [];
+        const fire = () => cbs.forEach(f => { try { f(); } catch (e) {} });
+        const client = await connectTo(good, {
+          clientId: "mg_" + key, clean: true, keepalive: 25, reconnectPeriod: 2000, connectTimeout: 9000,
+          will: { topic: base + key, payload: "", retain: true, qos: 1 }
+        });
+        client.on("message", (topic, buf) => {
+          const k = topic.slice(base.length); if (!k || k === key) return;
+          const txt = buf ? buf.toString() : "";
+          if (!txt) map.delete(k); else { try { map.set(k, JSON.parse(txt)); } catch (e) { return; } }
+          fire();
+        });
+        const pub = () => { if (mine !== null) client.publish(base + key, mine, { retain: true, qos: 1 }); };
+        client.on("connect", pub);           // al reconectar, volvemos a dejar nuestro estado
+        await new Promise((ok, ko) => client.subscribe(base + "+", { qos: 1 }, e => e ? ko(e) : ok()));
+        document.addEventListener("visibilitychange", () => { if (!document.hidden && !client.connected) { try { client.reconnect(); } catch (e) {} } });
+        return {
+          peers: () => [...map.entries()].map(([id, presence]) => ({ id, presence })),
+          presence: async obj => { mine = JSON.stringify(obj); pub(); },
+          onPeers: (f, e) => { cbs.push(f); if (e) errs.push(e); },
+          leave: async () => { try { client.publish(base + key, "", { retain: true, qos: 1 }); } catch (e) {} setTimeout(() => { try { client.end(true); } catch (e) {} }, 300); }
         };
       }
     };
@@ -145,7 +194,7 @@
     use(name){
       if (name === "downloads") return Promise.resolve(downloads);
       if (name === "room") {
-        if (!roomP) roomP = (CFG.firebase && CFG.firebase.databaseURL ? firebaseRoom() : peerRoom()).catch(() => null);
+        if (!roomP) roomP = (CFG.firebase && CFG.firebase.databaseURL ? firebaseRoom() : mqttRoom().catch(() => peerRoom())).catch(() => null);
         return roomP;
       }
       return Promise.resolve(null);
