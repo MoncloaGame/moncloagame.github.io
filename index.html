@@ -238,8 +238,8 @@ svg.board{width:100%;height:auto;display:block}
  <filter id="tksh" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="1.5" stdDeviation="1.4" flood-color="#000" flood-opacity=".6"/></filter>
 </defs></svg>
 
-<script src="config.js?v=1792970361"></script>
-<script src="net.js?v=1792970361"></script>
+<script src="config.js?v=1792970592"></script>
+<script src="net.js?v=1792970592"></script>
 <script>
 const ART_URL=location.origin+location.pathname;
 const PARTY={VOX:"Vox",PP:"PP",PSOE:"PSOE",IZQ:"Frente Amplio / Podemos"};
@@ -256,8 +256,8 @@ function abbrs(names){
 }
 function labs(){return abbrs(S.players.map(p=>p.n))}
 /* fichas: disco de color con una figura dentro (coordenadas de -10 a 10) */
-const TOKBG=["#c8102e","#1d8fe0","#4a2e10","#ffffff","#ffffff","#14254f","#f0b323","#6a2fb0","#3b4252","#5b6470"];
-const TOKRIM=["#7a0a1b","#0b4f86","#c9962a","#d9468f","#1f8a3a","#5fd3ff","#8a5a0a","#3d1670","#c9a46a","#1d2128"];
+const TOKBG=["#c8102e","#1d8fe0","#4a2e10","#ffffff","#ffffff","#14254f","#f0b323","#6a2fb0","#f6ecd9","#e9eef4"];
+const TOKRIM=["#7a0a1b","#0b4f86","#c9962a","#d9468f","#1f8a3a","#5fd3ff","#8a5a0a","#3d1670","#7a4a1c","#3a3f47"];
 const TOKART=[
  /* martillo y hoz */ `<g fill="none" stroke="#ffd400" stroke-width="2.4" stroke-linecap="round"><path d="M-5.5 6.5A8 8 0 1 0 6.5 -5.5"/><path d="M-5.5 6.5L-8.3 9.3"/><path d="M-4.2 -2.4L7.2 9"/></g><path d="M-9.2 -5.6L-4.8 -10L-1.4 -6.6L-5.8 -2.2Z" fill="#ffd400"/>`,
  /* gaviota */ `<path d="M-10 -0.5Q-5.5 -7 -0.6 0.4Q0 1.4 0.6 0.4Q5.5 -7 10 -0.5Q5.5 -3.6 0.9 3Q0 4.3 -0.9 3Q-5.5 -3.6 -10 -0.5Z" fill="#fff"/><path d="M-7 5.5Q-4.2 2.4 -1.6 5.6Q-4.2 4.3 -7 5.5Z" fill="#fff" opacity=".85"/>`,
