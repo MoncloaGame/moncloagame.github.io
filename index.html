@@ -63,7 +63,14 @@ h2{font-family:var(--display);font-weight:800;font-size:20px;margin:0}
 .cnt{display:flex;gap:8px;flex-wrap:wrap}
 .cnt button{font-family:var(--display);font-weight:800;font-size:18px;width:48px;height:44px;border-radius:6px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
 .cnt button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
-.names{display:grid;gap:8px}
+.names{display:grid;gap:10px}
+.prow{display:grid;gap:6px;padding:8px;border:1.5px solid var(--line);border-radius:10px;background:var(--paper)}
+.tokpick{display:flex;gap:8px;flex-wrap:wrap}
+.tokpick .tp{position:relative;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;border:2px solid var(--line);background:#fff;cursor:pointer;padding:0}
+.tokpick.sm .tp{width:38px;height:38px}
+.tokpick .tp.on{border-color:var(--ink);box-shadow:0 0 0 3px #e6ff00}
+.tokpick .tp:disabled{opacity:.35;cursor:not-allowed}
+.tokpick .tp small{position:absolute;bottom:-14px;font-size:9px;font-family:var(--display);font-weight:800;color:var(--muted)}
 .names label{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:700}
 .names input{flex:1;min-width:0;font:inherit;font-family:var(--body);font-weight:400;padding:9px 10px;border:1.5px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink)}
 .tok{flex:none;width:24px;height:24px;border-radius:50%;background:#fff;border:3px solid;display:grid;place-items:center;font-family:var(--display);font-weight:900;font-size:12px;color:#14203f}
@@ -425,7 +432,7 @@ function boardSVG(){
   Object.keys(at).forEach(pos=>{const ks=at[pos].slice().sort((a,b)=>(a===S.turn)-(b===S.turn));const [x0,y0]=xy(+pos);const a=(ang(+pos)+90)*Math.PI/180;
     ks.forEach((k,j)=>{const off=(j-(ks.length-1)/2)*15;const x=x0+Math.cos(a)*off,y=y0+Math.sin(a)*off+(+pos===C?38:0);
       const cur=k===S.turn&&S.phase!=="win";
-      s+=`<g pointer-events="none">${cur?`<circle class="curring" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="16" fill="none" stroke="#fff" stroke-width="2.5"/>`:""}${tokenShape(k,x,y,cur?12:10,L[k])}</g>`})});
+      s+=`<g pointer-events="none">${cur?`<circle class="curring" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="16" fill="none" stroke="#fff" stroke-width="2.5"/>`:""}${tokenShape(TK(k),x,y,cur?12:10,L[k])}</g>`})});
   return s+"</svg>";
 }
 function pie(w,size){
@@ -478,7 +485,12 @@ function cur(){return S.players[S.turn]}
 function has6(p){return p.w.every(Boolean)}
 function myTurn(){if(!S||!S.players.length)return false;if(ROLE==="local")return true;const p=cur();return !!p&&p.id===CID}
 function rnd6(){return Math.floor(Math.random()*6)}
-function newPlayer(n,id,k){return {n:clean(n)||"Jugador "+(k+1),id,pos:START[k],w:[0,0,0,0,0,0],ok:0,tot:0}}
+function newPlayer(n,id,k,tk){return {n:clean(n)||"Jugador "+(k+1),id,tk:(tk>=0&&tk<4)?tk:k,pos:START[k],w:[0,0,0,0,0,0],ok:0,tot:0}}
+function TK(k){const p=S&&S.players[k];return p&&p.tk>=0&&p.tk<4?p.tk:k}
+function freeTok(pref,except){const used=S?S.players.filter(p=>p!==except).map((p,k)=>p.tk):[];if(pref>=0&&pref<4&&!used.includes(pref))return pref;for(let t=0;t<4;t++)if(!used.includes(t))return t;return 0}
+let setupTok=[0,1,2,3];
+let myTk=(()=>{try{const v=+localStorage.getItem("gj-tok");return v>=0&&v<4?v:0}catch(e){return 0}})();
+function tokPicker(sel,taken,attr){return `<div class="tokpick" role="radiogroup" aria-label="Elige ficha">${[0,1,2,3].map(t=>{const own=taken[t];return `<button type="button" class="tp${t===sel?" on":""}" role="radio" aria-checked="${t===sel}" ${attr}="${t}" ${own&&t!==sel?`disabled title="${esc(own)}"`:""} aria-label="${TOKN[t]}${own&&t!==sel?" (de "+esc(own)+")":""}">${tokIcon(t,26," ")}${own&&t!==sel?`<small>${esc(own.slice(0,3).toUpperCase())}</small>`:""}</button>`}).join("")}</div>`}
 function newState(players,phase){return {v:3,players,turn:0,phase,roll:0,targets:[],q:null,last:null,fx:null,seq:0,winner:null,msg:"",decks:CATS.map((_,c)=>freshDeck(c)),la:{}}}
 
 /* ---------- motor del juego (mismo para local y online) ---------- */
@@ -534,7 +546,7 @@ function act(t,a){
   if(!S||!myTurn()||pending)return;
   if(ROLE==="guest"){
     if(!room||!hostHere){netMsg="El anfitrión no está conectado. Espera a que vuelva.";render();return}
-    mySeq++;pending=true;room.presence({r:"p",id:CID,n:myName,code,act:{s:mySeq,t,a:a??null}}).catch(()=>{pending=false;render()});
+    mySeq++;pending=true;room.presence({r:"p",id:CID,n:myName,tk:myTk,code,act:{s:mySeq,t,a:a??null}}).catch(()=>{pending=false;render()});
     render();return;
   }
   apply(t,a);commit();
@@ -566,7 +578,7 @@ async function joinRoom(c){
 async function createOnline(){
   myName=clean(document.getElementById("myname").value)||"Anfitrión";try{localStorage.setItem("gj-name",myName)}catch(e){}
   for(let tries=0;tries<6;tries++){
-    code=String(Math.floor(Math.random()*1000)).padStart(3,"0");ROLE="host";S=newState([newPlayer(myName,CID,0)],"lobby");S.need=onlineCount;seenLast=0;seenFx=0;
+    code=String(Math.floor(Math.random()*1000)).padStart(3,"0");ROLE="host";S=newState([newPlayer(myName,CID,0,myTk)],"lobby");S.need=onlineCount;seenLast=0;seenFx=0;
     netMsg="Preparando la sala…";render();if(!(await joinRoom(code)))return;
     await new Promise(r=>setTimeout(r,1200));
     const busy=room.peers().some(pr=>pr.presence&&pr.presence.r==="h"&&pr.presence.code===code&&pr.presence.hid!==CID);
@@ -585,13 +597,20 @@ async function joinOnline(fromLink){
   const saved=loadLocal(KEY+"-host-"+c);
   if(saved){code=c;ROLE="host";S=saved;seenLast=S.last?S.last.seq:0;seenFx=S.fx?S.fx.seq:0;render();if(await joinRoom(c))commit();return}
   code=c;ROLE="guest";S=null;netMsg="";render();
-  if(await joinRoom(c))room.presence({r:"p",id:CID,n:myName,code}).catch(()=>{});
+  if(await joinRoom(c))room.presence({r:"p",id:CID,n:myName,tk:myTk,code}).catch(()=>{});
 }
 function renameMe(){
   const el=document.getElementById("gname");const nm=clean(el?el.value:"");if(!nm||!room)return;
   myName=nm;try{localStorage.setItem("gj-name",myName)}catch(e){}
-  room.presence({r:"p",id:CID,n:myName,code}).catch(()=>{});
+  room.presence({r:"p",id:CID,n:myName,tk:myTk,code}).catch(()=>{});
   netMsg="Nombre actualizado.";render();
+}
+function pickMyTok(t){
+  if(!S||S.phase!=="lobby")return;const me=S.players.find(p=>p.id===CID);
+  if(me&&S.players.some(p=>p!==me&&p.tk===t)){netMsg="Esa ficha ya la tiene otro jugador.";render();return}
+  myTk=t;try{localStorage.setItem("gj-tok",String(t))}catch(e){}
+  if(ROLE==="host"){if(me)me.tk=t;netMsg="";commit()}
+  else{if(room)room.presence({r:"p",id:CID,n:myName,tk:myTk,code}).catch(()=>{});if(me)me.tk=t;netMsg="";render()}
 }
 function onPeers(){
   if(!room)return;const peers=room.peers();
@@ -600,8 +619,9 @@ function onPeers(){
     for(const pr of peers){
       const pp=pr.presence;if(!pp||pp.r!=="p"||pp.code!==code||typeof pp.id!=="string"||pp.id===CID)continue;
       let idx=S.players.findIndex(x=>x.id===pp.id);const nm=clean(pp.n);
-      if(idx<0&&S.phase==="lobby"&&S.players.length<(S.need||4)&&nm){let un=nm,k=2;while(S.players.some(x=>x.n===un))un=nm+" "+(k++);S.players.push(newPlayer(un,pp.id,S.players.length));idx=S.players.length-1;changed=true}
+      if(idx<0&&S.phase==="lobby"&&S.players.length<(S.need||4)&&nm){let un=nm,k=2;while(S.players.some(x=>x.n===un))un=nm+" "+(k++);S.players.push(newPlayer(un,pp.id,S.players.length,freeTok(pp.tk)));idx=S.players.length-1;changed=true}
       else if(idx>=0&&S.phase==="lobby"&&nm&&nm!==S.players[idx].n){S.players[idx].n=nm;changed=true}
+      if(idx>=0&&S.phase==="lobby"&&pp.tk>=0&&pp.tk<4&&pp.tk!==S.players[idx].tk&&freeTok(pp.tk,S.players[idx])===pp.tk){S.players[idx].tk=pp.tk;changed=true}
       const ac=pp.act;
       if(idx>=0&&ac&&typeof ac.s==="number"&&ac.s>(S.la[pp.id]||0)){
         S.la[pp.id]=ac.s;
@@ -676,7 +696,8 @@ function homeHTML(){
     ${tab==="local"?`
     <div class="tag">Jugadores</div>
     <div class="cnt" role="group" aria-label="Número de jugadores">${[1,2,3,4].map(n=>`<button id="n${n}" aria-pressed="${n===setupCount}">${n}</button>`).join("")}</div>
-    <div class="names">${Array.from({length:setupCount},(_,k)=>`<label for="nm${k}"><span id="ti${k}">${tokIcon(k,30,abbrs(Array.from({length:setupCount},(_,j)=>setupNames[j]||"Jugador "+(j+1)))[k])}</span><input id="nm${k}" maxlength="18" placeholder="Jugador ${k+1} · ${TOKN[k]}" value="${esc(setupNames[k])}"></label>`).join("")}</div>
+    <div class="names">${Array.from({length:setupCount},(_,k)=>`<div class="prow"><label for="nm${k}"><span id="ti${k}">${tokIcon(setupTok[k],30,abbrs(Array.from({length:setupCount},(_,j)=>setupNames[j]||"Jugador "+(j+1)))[k])}</span><input id="nm${k}" maxlength="18" placeholder="Jugador ${k+1} · ${TOKN[setupTok[k]]}" value="${esc(setupNames[k])}"></label><div class="tokpick sm" role="radiogroup" aria-label="Ficha del jugador ${k+1}">${[0,1,2,3].map(t=>`<button type="button" class="tp${t===setupTok[k]?" on":""}" role="radio" aria-checked="${t===setupTok[k]}" data-row="${k}" data-tok="${t}" aria-label="${TOKN[t]}">${tokIcon(t,24," ")}</button>`).join("")}</div></div>`).join("")}</div>
+    <p class="note">Elige la ficha de cada jugador. Si eliges una que ya tiene otro, os la intercambiáis.</p>
     <div class="row"><button class="btn" id="go">Empezar partida</button>${saved&&saved.phase!=="win"?`<button class="btn ghost" id="resume">Continuar partida guardada</button>`:""}</div>`
     :`
     <p style="margin:0">Elige cuántos vais a jugar, crea la partida y comparte el enlace por WhatsApp. Empieza sola en cuanto se unan todos.</p>
@@ -715,7 +736,8 @@ function lobbyHTML(){
     <p class="note">Código de la partida: <b>${esc(code.toUpperCase())}</b>. Quien abra el enlace entra directamente en la partida.</p>
     <div class="tag">Jugadores (${S.players.length}/${S.need||4})</div>
     <p class="msg">${S.players.length<(S.need||4)?`Faltan ${(S.need||4)-S.players.length}. La partida empezará sola cuando se unan todos.`:"¡Ya estáis todos!"}</p>
-    <div class="players">${S.players.map((q,k)=>`<div class="pl"><span>${tokIcon(k,32,labs()[k])}</span><span class="nm">${esc(q.n)}${q.id===CID?" (tú)":""}<small>${TOKN[k]}${k===0?" · anfitrión":""}</small></span></div>`).join("")}</div>
+    ${(()=>{const me=S.players.find(p=>p.id===CID);if(!me)return "";const taken={};S.players.forEach(p=>{if(p!==me)taken[p.tk]=p.n});return `<div class="tag">Elige tu ficha</div>${tokPicker(me.tk,taken,"data-mytok")}`})()}
+    <div class="players">${S.players.map((q,k)=>`<div class="pl"><span>${tokIcon(TK(k),32,labs()[k])}</span><span class="nm">${esc(q.n)}${q.id===CID?" (tú)":""}<small>${TOKN[TK(k)]}${k===0?" · anfitrión":""}</small></span></div>`).join("")}</div>
     ${host?(S.players.length>=2?`<div class="row"><button class="btn ghost" id="start">Empezar ya con ${S.players.length}</button></div>`:""):`<p class="note">Esperando al resto de jugadores…</p>`}
     ${!host&&!hostHere?`<p class="note">El anfitrión no aparece conectado ahora mismo.</p>`:""}
     ${netMsg?`<p class="msg" role="status">${esc(netMsg)}</p>`:""}
@@ -733,13 +755,13 @@ function gameHTML(){
   return `${online?`<div class="netbar"><span>Online · código <b>${esc(code.toUpperCase())}</b></span>${ROLE==="guest"&&!hostHere?`<span class="warn">Anfitrión desconectado</span>`:""}<button class="mini bell" id="bell" aria-pressed="${alertsOn}" title="Avisos de turno">${alertsOn?"🔔 Avisos":"🔕 Avisos"}</button><a class="mini" href="${waLink()}" target="_blank" rel="noopener">Invitar</a></div>`:""}
   <section class="panel">
     <div class="boardwrap">${boardSVG()}</div>
-    <div class="turn"><div class="tleft">${tokIcon(S.turn,40,L[S.turn])}<span class="who">${esc(p.n)}${online&&p.id===CID?" (tú)":""}<span class="tname">Ficha: ${TOKN[S.turn]}</span></span></div><div class="tmid">${pie3d(p.w,`${p.w.filter(Boolean).length} de 6 quesitos`)}</div><div class="tright">${dieHTML(S.roll,mine&&!pending&&S.phase==="roll"&&!(has6(p)&&p.pos===C))}</div></div>
+    <div class="turn"><div class="tleft">${tokIcon(TK(S.turn),40,L[S.turn])}<span class="who">${esc(p.n)}${online&&p.id===CID?" (tú)":""}<span class="tname">Ficha: ${TOKN[TK(S.turn)]}</span></span></div><div class="tmid">${pie3d(p.w,`${p.w.filter(Boolean).length} de 6 quesitos`)}</div><div class="tright">${dieHTML(S.roll,mine&&!pending&&S.phase==="roll"&&!(has6(p)&&p.pos===C))}</div></div>
     <p class="msg" aria-live="polite">${esc(netMsg||S.msg)}</p>
     <div class="row">${ctrl}</div>
   </section>
   <section class="panel">
     <div class="tag">Marcador</div>
-    <div class="players">${S.players.map((q,k)=>`<div class="pl${k===S.turn?" cur":""}">${tokIcon(k,32,L[k])}<span class="nm">${esc(q.n)}${online&&q.id===CID?" (tú)":""}<small>${TOKN[k]} · ${q.ok} aciertos de ${q.tot} · ${q.w.filter(Boolean).length}/6 quesitos</small></span>${pie(q.w,30)}</div>`).join("")}</div>
+    <div class="players">${S.players.map((q,k)=>`<div class="pl${k===S.turn?" cur":""}">${tokIcon(TK(k),32,L[k])}<span class="nm">${esc(q.n)}${online&&q.id===CID?" (tú)":""}<small>${TOKN[TK(k)]} · ${q.ok} aciertos de ${q.tot} · ${q.w.filter(Boolean).length}/6 quesitos</small></span>${pie(q.w,30)}</div>`).join("")}</div>
     <div class="row"><button class="btn ghost" id="quit">${online?"Salir de la partida":"Volver al inicio"}</button></div>
   </section>`;
 }
@@ -792,8 +814,10 @@ function bind(){
   const b=id=>document.getElementById(id);
   if(b("tlocal")){b("tlocal").onclick=()=>{grab();tab="local";netMsg="";render()};b("tonline").onclick=()=>{grab();tab="online";netMsg="";render()}}
   [1,2,3,4].forEach(n=>{if(b("n"+n))b("n"+n).onclick=()=>{grab();setupCount=n;render()}});
-  for(let k=0;k<4;k++){const el=b("nm"+k);if(el)el.addEventListener("input",()=>{grab();const L=abbrs(Array.from({length:setupCount},(_,j)=>setupNames[j]||"Jugador "+(j+1)));for(let i=0;i<setupCount;i++)b("ti"+i).innerHTML=tokIcon(i,30,L[i])})}
-  if(b("go"))b("go").onclick=()=>{grab();ROLE="local";code="";S=newState(Array.from({length:setupCount},(_,k)=>newPlayer(setupNames[k],"p"+k,k)),"roll");S.msg=`Empieza ${S.players[0].n}. Tira el dado.`;seenLast=0;seenFx=0;commit()};
+  for(let k=0;k<4;k++){const el=b("nm"+k);if(el)el.addEventListener("input",()=>{grab();const L=abbrs(Array.from({length:setupCount},(_,j)=>setupNames[j]||"Jugador "+(j+1)));for(let i=0;i<setupCount;i++)b("ti"+i).innerHTML=tokIcon(setupTok[i],30,L[i])})}
+  document.querySelectorAll("[data-row]").forEach(el=>el.onclick=()=>{grab();const k=+el.dataset.row,t=+el.dataset.tok,o=setupTok.indexOf(t);if(o>=0&&o!==k){setupTok[o]=setupTok[k]}setupTok[k]=t;render()});
+  document.querySelectorAll("[data-mytok]").forEach(el=>el.onclick=()=>pickMyTok(+el.dataset.mytok));
+  if(b("go"))b("go").onclick=()=>{grab();ROLE="local";code="";S=newState(Array.from({length:setupCount},(_,k)=>newPlayer(setupNames[k],"p"+k,k,setupTok[k])),"roll");S.msg=`Empieza ${S.players[0].n}. Tira el dado.`;seenLast=0;seenFx=0;commit()};
   if(b("resume"))b("resume").onclick=()=>{S=loadLocal(KEY);ROLE="local";if(S.phase==="question"&&!S.q)S.phase="roll";seenLast=S.last?S.last.seq:0;seenFx=S.fx?S.fx.seq:0;render()};
   if(b("create"))b("create").onclick=createOnline;
   if(b("join"))b("join").onclick=joinOnline;
@@ -808,7 +832,7 @@ function bind(){
   if(b("bell"))b("bell").onclick=toggleBell;
   const dd=b("die");if(dd&&dd.classList.contains("ready")){dd.onclick=rollClick;dd.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();rollClick()}}}
   if(b("final"))b("final").onclick=()=>act("final");
-  if(b("again"))b("again").onclick=()=>{if(ROLE==="host"){S=newState(S.players.map((p,k)=>newPlayer(p.n,p.id,k)),"roll");S.msg=`Empieza ${S.players[0].n}.`;seenLast=0;seenFx=0;commit()}else{S=null;try{localStorage.removeItem(KEY)}catch(e){};render()}};
+  if(b("again"))b("again").onclick=()=>{if(ROLE==="host"){S=newState(S.players.map((p,k)=>newPlayer(p.n,p.id,k,p.tk)),"roll");S.msg=`Empieza ${S.players[0].n}.`;seenLast=0;seenFx=0;commit()}else{S=null;try{localStorage.removeItem(KEY)}catch(e){};render()}};
   if(b("quit"))b("quit").onclick=()=>{if(ROLE==="local"){S=null;render()}else leaveGame()};
   app.querySelectorAll("[data-go]").forEach(el=>el.onclick=()=>act("move",+el.dataset.go));
   if(myTurn()&&!pending)app.querySelectorAll(".node.target").forEach(el=>{el.onclick=()=>act("move",+el.dataset.id);el.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();act("move",+el.dataset.id)}}});
@@ -921,7 +945,7 @@ function playFx(f){
   fxEl.innerHTML=`<div class="rays" aria-hidden="true"></div><canvas aria-hidden="true"></canvas>
     <div class="doors${reduce?" open":""}" aria-hidden="true"><div class="plate">LA MONCLOA</div><div class="door l"><i></i></div><div class="door r"><i></i></div></div>
     <div class="fx-card" role="status">
-      <div class="fx-crown">${tokIcon(f.who,96,labs()[f.who])}</div>
+      <div class="fx-crown">${tokIcon(TK(f.who),96,labs()[f.who])}</div>
       <div class="fx-name">${esc(who)}</div>
       <div class="flag" aria-hidden="true"><i></i><i></i><i></i></div>
       <div class="fx-pres">¡Enhorabuena al nuevo Presidente del Gobierno de España!</div>
