@@ -233,8 +233,8 @@ svg.board{width:100%;height:auto;display:block}
  <filter id="tksh" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="1.5" stdDeviation="1.4" flood-color="#000" flood-opacity=".6"/></filter>
 </defs></svg>
 
-<script src="config.js?v=1792965376"></script>
-<script src="net.js?v=1792965376"></script>
+<script src="config.js?v=1792965447"></script>
+<script src="net.js?v=1792965447"></script>
 <script>
 const ART_URL=location.origin+location.pathname;
 const PARTY={VOX:"Vox",PP:"PP",PSOE:"PSOE",IZQ:"Frente Amplio / Podemos"};
@@ -573,7 +573,7 @@ async function joinRoom(c){
   const lr=await roomP;if(!lr){netMsg="No se ha podido conectar con el servicio de partidas. Comprueba tu conexión a Internet e inténtalo de nuevo.";render();return false}
   let err=null;
   for(let t=0;t<3;t++){try{room=await lr.join("gj-"+c);err=null;break}catch(e){err=e;netMsg="Conectando… (intento "+(t+2)+" de 3)";render();await new Promise(r=>setTimeout(r,2000))}}
-  if(err){netMsg="No se ha podido entrar en la sala. Inténtalo de nuevo."+(err&&err.message?" ("+String(err.message).slice(0,90)+(window.MONCLOA_NET?" · "+window.MONCLOA_NET:"")+(window.MONCLOA_NET_ERR?" · "+String(window.MONCLOA_NET_ERR).slice(0,90):"")+")":"");render();return false}
+  if(err){netMsg="No se ha podido entrar en la sala. Inténtalo de nuevo."+(err&&err.message?" ("+String(err.message).slice(0,260)+(window.MONCLOA_NET?" · "+window.MONCLOA_NET:"")+(window.MONCLOA_NET_ERR?" · "+String(window.MONCLOA_NET_ERR).slice(0,90):"")+")":"");render();return false}
   room.onPeers(onPeers,()=>{netMsg="Se ha perdido la conexión con la sala.";render()});
   return true;
 }
@@ -735,7 +735,7 @@ function lobbyHTML(){
     ${host?`<a class="btn wa" href="${waLink()}" target="_blank" rel="noopener">Invitar por WhatsApp</a>
     <div class="row"><input id="lnk" class="linkbox" readonly value="${esc(shareLink())}"><button class="btn ghost" id="copy">Copiar enlace</button></div>
     ${downloads?`<button class="btn ghost" id="invimg">Guardar imagen de invitación</button>`:""}`:""}
-    <p class="note">Código de la partida: <b>${esc(code.toUpperCase())}</b>. Quien abra el enlace entra directamente en la partida.</p>
+    <p class="note">Código de la partida: <b>${esc(code.toUpperCase())}</b>${window.MONCLOA_NET_SERVERS?` · conectado a ${esc(window.MONCLOA_NET_SERVERS)}`:""}. Quien abra el enlace entra directamente en la partida.</p>
     <div class="tag">Jugadores (${S.players.length}/${S.need||4})</div>
     <p class="msg">${S.players.length<(S.need||4)?`Faltan ${(S.need||4)-S.players.length}. La partida empezará sola cuando se unan todos.`:"¡Ya estáis todos!"}</p>
     ${(()=>{const me=S.players.find(p=>p.id===CID);if(!me)return "";const taken={};S.players.forEach(p=>{if(p!==me)taken[p.tk]=p.n});return `<div class="tag">Elige tu ficha</div>${tokPicker(me.tk,taken,"data-mytok")}`})()}
