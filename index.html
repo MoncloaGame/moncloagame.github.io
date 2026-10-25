@@ -91,10 +91,14 @@ svg.board{width:100%;height:auto;display:block}
 .tdot{pointer-events:none}
 .tlab{cursor:pointer;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
 .tlab:focus-visible rect{stroke:#e6ff00;stroke-width:3}
-.turn{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:10px}
-.turn .tleft{display:flex;align-items:center;gap:10px;min-width:0}
-.turn .tmid{display:flex;justify-content:center}
-.turn .tright{display:flex;justify-content:flex-end}
+.turn{display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px}
+.turn .tleft{display:flex;align-items:center;gap:10px;flex:0 1 auto;max-width:100%;min-width:0}
+.turn .tmid{display:flex;justify-content:center;flex:1 0 auto}
+.turn .tright{display:flex;justify-content:flex-end;flex:0 0 auto}
+.turn .who{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;overflow-wrap:anywhere;flex:0 1 auto}
+.autobar{height:4px;border-radius:2px;background:var(--soft);overflow:hidden;margin:4px 0 8px}
+.autobar i{display:block;height:100%;width:100%;background:var(--ink);transform-origin:left;animation:autobar linear forwards}
+@keyframes autobar{from{transform:scaleX(1)}to{transform:scaleX(0)}}
 .pie3d{display:block;filter:drop-shadow(0 2px 2px rgba(14,27,59,.25))}
 .turn .who{font-family:var(--display);font-weight:800;font-size:18px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
 .die{flex:none;width:48px;height:48px;border-radius:9px;background:#fff;border:2px solid var(--ink);display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);padding:5px}
@@ -106,7 +110,7 @@ svg.board{width:100%;height:auto;display:block}
 .players{display:grid;gap:6px}
 .pl{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;border:1.5px solid transparent}
 .pl.cur{border-color:var(--ink);background:var(--soft)}
-.pl .nm{font-family:var(--display);font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pl .nm{font-family:var(--display);font-weight:700;overflow-wrap:anywhere;min-width:0}
 .pl .nm small{display:block;font-weight:500;color:var(--muted);font-size:12px}
 .ov{position:fixed;inset:0;background:var(--scrim);display:flex;z-index:20;overflow-y:auto;
   padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
@@ -233,8 +237,8 @@ svg.board{width:100%;height:auto;display:block}
  <filter id="tksh" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="1.5" stdDeviation="1.4" flood-color="#000" flood-opacity=".6"/></filter>
 </defs></svg>
 
-<script src="config.js?v=1792965447"></script>
-<script src="net.js?v=1792965447"></script>
+<script src="config.js?v=1792966686"></script>
+<script src="net.js?v=1792966686"></script>
 <script>
 const ART_URL=location.origin+location.pathname;
 const PARTY={VOX:"Vox",PP:"PP",PSOE:"PSOE",IZQ:"Frente Amplio / Podemos"};
@@ -475,7 +479,7 @@ const CID=(()=>{try{let v=localStorage.getItem("gj-cid");if(!v){v=rid(12);localS
 let myName=(()=>{try{return localStorage.getItem("gj-name")||""}catch(e){return ""}})();
 function shuffle(a){a=a.slice();for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a}
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
-function clean(n){return String(n||"").replace(/[\u0000-\u001f\u007f-\u009f​-‏‪-‮]/g,"").trim().slice(0,18)}
+function clean(n){return String(n||"").replace(/[\u0000-\u001f\u007f-\u009f​-‏‪-‮]/g,"").trim().slice(0,30)}
 const KEY="gran-juego-29n-v2";
 function saveLocal(){if(ROLE==="guest")return;try{localStorage.setItem(ROLE==="host"?KEY+"-host-"+code:KEY,JSON.stringify(S))}catch(e){}}
 function loadLocal(k){try{const v=JSON.parse(localStorage.getItem(k));if(v&&v.players&&v.v===3)return v}catch(e){}return null}
@@ -698,12 +702,12 @@ function homeHTML(){
     ${tab==="local"?`
     <div class="tag">Jugadores</div>
     <div class="cnt" role="group" aria-label="Número de jugadores">${[1,2,3,4].map(n=>`<button id="n${n}" aria-pressed="${n===setupCount}">${n}</button>`).join("")}</div>
-    <div class="names">${Array.from({length:setupCount},(_,k)=>`<div class="prow"><label for="nm${k}"><span id="ti${k}">${tokIcon(setupTok[k],30,abbrs(Array.from({length:setupCount},(_,j)=>setupNames[j]||"Jugador "+(j+1)))[k])}</span><input id="nm${k}" maxlength="18" placeholder="Jugador ${k+1} · ${TOKN[setupTok[k]]}" value="${esc(setupNames[k])}"></label><div class="tokpick sm" role="radiogroup" aria-label="Ficha del jugador ${k+1}">${[0,1,2,3].map(t=>`<button type="button" class="tp${t===setupTok[k]?" on":""}" role="radio" aria-checked="${t===setupTok[k]}" data-row="${k}" data-tok="${t}" aria-label="${TOKN[t]}">${tokIcon(t,24," ")}</button>`).join("")}</div></div>`).join("")}</div>
+    <div class="names">${Array.from({length:setupCount},(_,k)=>`<div class="prow"><label for="nm${k}"><span id="ti${k}">${tokIcon(setupTok[k],30,abbrs(Array.from({length:setupCount},(_,j)=>setupNames[j]||"Jugador "+(j+1)))[k])}</span><input id="nm${k}" maxlength="30" placeholder="Jugador ${k+1} · ${TOKN[setupTok[k]]}" value="${esc(setupNames[k])}"></label><div class="tokpick sm" role="radiogroup" aria-label="Ficha del jugador ${k+1}">${[0,1,2,3].map(t=>`<button type="button" class="tp${t===setupTok[k]?" on":""}" role="radio" aria-checked="${t===setupTok[k]}" data-row="${k}" data-tok="${t}" aria-label="${TOKN[t]}">${tokIcon(t,24," ")}</button>`).join("")}</div></div>`).join("")}</div>
     <p class="note">Elige la ficha de cada jugador. Si eliges una que ya tiene otro, os la intercambiáis.</p>
     <div class="row"><button class="btn" id="go">Empezar partida</button>${saved&&saved.phase!=="win"?`<button class="btn ghost" id="resume">Continuar partida guardada</button>`:""}</div>`
     :`
     <p style="margin:0">Elige cuántos vais a jugar, crea la partida y comparte el enlace por WhatsApp. Empieza sola en cuanto se unan todos.</p>
-    <label class="field" for="myname">Tu nombre<input id="myname" maxlength="18" value="${esc(myName)}" placeholder="Cómo te verán los demás"></label>
+    <label class="field" for="myname">Tu nombre<input id="myname" maxlength="30" value="${esc(myName)}" placeholder="Cómo te verán los demás"></label>
     <div class="tag">¿Cuántos vais a jugar?</div>
     <div class="cnt" role="group" aria-label="Número de jugadores de la partida online">${[2,3,4].map(n=>`<button id="on${n}" aria-pressed="${n===onlineCount}">${n}</button>`).join("")}</div>
     <div class="row"><button class="btn" id="create" ${net?"":"disabled"}>Crear partida de ${onlineCount}</button></div>
@@ -731,7 +735,7 @@ function lobbyHTML(){
     <div class="tag">Partida online</div>
     <div class="lobbylogo">${logoSVG(120)}</div>
     ${host?`<p class="msg">Envía el enlace: quien lo abra entra directamente en tu partida.</p>`:`<p class="msg">¡Ya estás dentro de la partida!</p>
-    <label class="field" for="gname">Tu nombre<div class="row"><input id="gname" maxlength="18" value="${esc(myName)}"><button class="btn ghost" id="rename">Cambiar</button></div></label>`}
+    <label class="field" for="gname">Tu nombre<div class="row"><input id="gname" maxlength="30" value="${esc(myName)}"><button class="btn ghost" id="rename">Cambiar</button></div></label>`}
     ${host?`<a class="btn wa" href="${waLink()}" target="_blank" rel="noopener">Invitar por WhatsApp</a>
     <div class="row"><input id="lnk" class="linkbox" readonly value="${esc(shareLink())}"><button class="btn ghost" id="copy">Copiar enlace</button></div>
     ${downloads?`<button class="btn ghost" id="invimg">Guardar imagen de invitación</button>`:""}`:""}
@@ -843,6 +847,7 @@ function bind(){
 function grab(){for(let k=0;k<4;k++){const el=document.getElementById("nm"+k);if(el)setupNames[k]=el.value}const m=document.getElementById("myname");if(m)myName=m.value;const j=document.getElementById("jcode");if(j)joinCode=j.value}
 
 /* ---------- preguntas y respuestas ---------- */
+const AUTO_MS=2000;
 function syncOverlay(){
   let html="",key="";
   if(S&&S.last&&S.last.seq>seenLast){key="fb"+S.last.seq;html=feedbackHTML(S.last)}
@@ -853,7 +858,9 @@ function syncOverlay(){
   ov.innerHTML=html;ov.hidden=false;
   ov.querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>{ov.querySelectorAll("[data-pick]").forEach(x=>x.disabled=true);act("pick",+b.dataset.pick)});
   ov.querySelectorAll("[data-cat]").forEach(b=>b.onclick=()=>act("cat",+b.dataset.cat));
-  const cont=document.getElementById("cont");if(cont){cont.onclick=()=>{seenLast=S.last.seq;ovKey="__cerrado__";render()};cont.focus({preventScroll:true})}
+  const cont=document.getElementById("cont");
+  if(cont&&S.last){const sq=S.last.seq,close=()=>{if(ovKey!==key)return;seenLast=Math.max(seenLast,sq);ovKey="__cerrado__";render()};
+    cont.onclick=close;cont.focus({preventScroll:true});clearTimeout(syncOverlay.t);syncOverlay.t=setTimeout(close,AUTO_MS)}
   const f=ov.querySelector("[data-pick]:not([disabled]),[data-cat]");if(f)f.focus({preventScroll:true});
 }
 function askLine(it){return it.prop?"¿Quién lo propone?":it.fact?"¿De quién se trata?":"Elige la respuesta correcta"}
@@ -884,6 +891,7 @@ function feedbackHTML(l){
       <p class="verdict ${l.ok?"ok":"bad"}">${l.ok?"¡Correcto!":"No. Era: "+esc(it.opts[it.ans])}</p>
       ${extra?`<p style="color:var(--ink)">${extra}</p>`:""}
       <p>${esc(it.det)}${su?` Fuente: <a href="${su}" target="_blank" rel="noopener">${esc(sn)}</a>`:""}</p>
+      <div class="autobar" aria-hidden="true"><i style="animation-duration:${AUTO_MS}ms"></i></div>
       <button class="btn" id="cont">Continuar</button>
     </div></div>`;
 }
