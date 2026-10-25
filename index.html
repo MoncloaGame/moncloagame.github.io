@@ -67,7 +67,8 @@ h2{font-family:var(--display);font-weight:800;font-size:20px;margin:0}
 .prow{display:grid;gap:6px;padding:8px;border:1.5px solid var(--line);border-radius:10px;background:var(--paper)}
 .tokpick{display:flex;gap:8px;flex-wrap:wrap}
 .tokpick .tp{position:relative;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;border:2px solid var(--line);background:#fff;cursor:pointer;padding:0}
-.tokpick.sm .tp{width:38px;height:38px}
+.tokpick.sm .tp{width:36px;height:36px}
+.tokpick{gap:6px}
 .tokpick .tp.on{border-color:var(--ink);box-shadow:0 0 0 3px #e6ff00}
 .tokpick .tp:disabled{opacity:.35;cursor:not-allowed}
 .tokpick .tp small{position:absolute;bottom:-14px;font-size:9px;font-family:var(--display);font-weight:800;color:var(--muted)}
@@ -237,8 +238,8 @@ svg.board{width:100%;height:auto;display:block}
  <filter id="tksh" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="1.5" stdDeviation="1.4" flood-color="#000" flood-opacity=".6"/></filter>
 </defs></svg>
 
-<script src="config.js?v=1792968232"></script>
-<script src="net.js?v=1792968232"></script>
+<script src="config.js?v=1792970361"></script>
+<script src="net.js?v=1792970361"></script>
 <script>
 const ART_URL=location.origin+location.pathname;
 const PARTY={VOX:"Vox",PP:"PP",PSOE:"PSOE",IZQ:"Frente Amplio / Podemos"};
@@ -247,25 +248,39 @@ const CATS=["Instituciones y organización del Estado","Partidos políticos","L�
 const CCOL=["#1e7be6","#e3262f","#9a2fd0","#16a957","#ff8a00","#ffd400"];
 const CTXT=["#fff","#fff","#fff","#fff","#14203f","#14203f"];
 const PCOL=["#f5c542","#c9ced6","#cd7f32","#8fe3ff"];
-const TOKN=["Oro","Plata","Bronce","Diamante"];
+const TOKN=["Martillo y hoz","Gaviota","Águila","Flor","Trébol","Diamante","León","Balanza","Mallete","Cañón"];
 const RIM=["#7a5304","#5b616b","#5a300c","#1d6fa5"];
 function abbrs(names){
   const b=names.map((n,k)=>{const c=(n||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^A-Za-z0-9]/g,"").toUpperCase();return c.slice(0,3)||("J"+(k+1))});
   return b.map((v,i)=>b.indexOf(v)!==i||b.lastIndexOf(v)!==i?v.slice(0,2)+(i+1):v);
 }
 function labs(){return abbrs(S.players.map(p=>p.n))}
+/* fichas: disco de color con una figura dentro (coordenadas de -10 a 10) */
+const TOKBG=["#c8102e","#1d8fe0","#4a2e10","#ffffff","#ffffff","#14254f","#f0b323","#6a2fb0","#3b4252","#5b6470"];
+const TOKRIM=["#7a0a1b","#0b4f86","#c9962a","#d9468f","#1f8a3a","#5fd3ff","#8a5a0a","#3d1670","#c9a46a","#1d2128"];
+const TOKART=[
+ /* martillo y hoz */ `<g fill="none" stroke="#ffd400" stroke-width="2.4" stroke-linecap="round"><path d="M-5.5 6.5A8 8 0 1 0 6.5 -5.5"/><path d="M-5.5 6.5L-8.3 9.3"/><path d="M-4.2 -2.4L7.2 9"/></g><path d="M-9.2 -5.6L-4.8 -10L-1.4 -6.6L-5.8 -2.2Z" fill="#ffd400"/>`,
+ /* gaviota */ `<path d="M-10 -0.5Q-5.5 -7 -0.6 0.4Q0 1.4 0.6 0.4Q5.5 -7 10 -0.5Q5.5 -3.6 0.9 3Q0 4.3 -0.9 3Q-5.5 -3.6 -10 -0.5Z" fill="#fff"/><path d="M-7 5.5Q-4.2 2.4 -1.6 5.6Q-4.2 4.3 -7 5.5Z" fill="#fff" opacity=".85"/>`,
+ /* águila */ `<path d="M0 -6.6L1.6 -4.2L9.6 -7.4L6.6 -2.6L9.8 -1.2L4.8 0.8L3.4 6L1.6 4.6L0 8.6L-1.6 4.6L-3.4 6L-4.8 0.8L-9.8 -1.2L-6.6 -2.6L-9.6 -7.4L-1.6 -4.2Z" fill="#f2c94c"/><circle cx="0" cy="-7.4" r="1.9" fill="#f2c94c"/><path d="M0.9 -7.6L3 -7L1 -6.4Z" fill="#ff9f1c"/>`,
+ /* flor rosa */ `${[0,72,144,216,288].map(a=>`<circle cx="${(4.6*Math.cos((a-90)*Math.PI/180)).toFixed(2)}" cy="${(4.6*Math.sin((a-90)*Math.PI/180)).toFixed(2)}" r="3.9" fill="#ff5fa8" stroke="#d9468f" stroke-width=".6"/>`).join("")}<circle r="2.7" fill="#ffd400" stroke="#e0a100" stroke-width=".6"/>`,
+ /* trébol de tres hojas */ `<path d="M0.6 2.4Q1.6 7 4.6 9.4" fill="none" stroke="#1f8a3a" stroke-width="1.8" stroke-linecap="round"/>${[[0,-4.4],[-4.1,1.4],[4.1,1.4]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="4.1" fill="#2fb34a" stroke="#1f8a3a" stroke-width=".7"/>`).join("")}<circle r="1.3" fill="#1f8a3a"/>`,
+ /* diamante */ `<path d="M-8.4 -2.4L-4.8 -7.4H4.8L8.4 -2.4L0 8.6Z" fill="#8fe3ff" stroke="#e8fbff" stroke-width=".9" stroke-linejoin="round"/><path d="M-8.4 -2.4H8.4M-4.8 -7.4L-2.4 -2.4L0 8.6L2.4 -2.4L4.8 -7.4M-2.4 -2.4L0 -7.4L2.4 -2.4" fill="none" stroke="#2b8fd6" stroke-width=".8"/>`,
+ /* león */ `${Array.from({length:12},(_,i)=>{const a=i*30*Math.PI/180;return `<circle cx="${(6.4*Math.cos(a)).toFixed(2)}" cy="${(6.4*Math.sin(a)+0.6).toFixed(2)}" r="3" fill="#8a4b12"/>`}).join("")}<circle cx="0" cy="0.6" r="6" fill="#ffcf6b"/><circle cx="-2.2" cy="-0.8" r=".9" fill="#2b1a08"/><circle cx="2.2" cy="-0.8" r=".9" fill="#2b1a08"/><path d="M-1.4 1.6H1.4L0 3Z" fill="#2b1a08"/><path d="M0 3V4.2M-1.8 4.6Q0 5.6 1.8 4.6" fill="none" stroke="#2b1a08" stroke-width=".7" stroke-linecap="round"/>`,
+ /* balanza */ `<g fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M0 -8.6V7.4M-4.6 8.6H4.6M-8 -5.4H8M-8 -5.4L-10 1M-8 -5.4L-6 1M8 -5.4L6 1M8 -5.4L10 1"/></g><path d="M-10.6 1H-5.4A2.6 2.6 0 0 1 -10.6 1ZM5.4 1H10.6A2.6 2.6 0 0 1 5.4 1Z" fill="#ffd400"/><circle cx="0" cy="-8.6" r="1.4" fill="#ffd400"/>`,
+ /* mallete de juez */ `<g transform="rotate(-40 -1 -2)"><rect x="-8" y="-8.4" width="11" height="5.6" rx="1.4" fill="#c98a4b" stroke="#7a4a1c" stroke-width=".8"/><rect x="-9" y="-8.9" width="2" height="6.6" rx=".8" fill="#e2b07a"/><rect x="2" y="-8.9" width="2" height="6.6" rx=".8" fill="#e2b07a"/><rect x="-3.4" y="-3" width="2.2" height="11" rx="1" fill="#c98a4b" stroke="#7a4a1c" stroke-width=".6"/></g><rect x="1.4" y="6.4" width="8.4" height="3" rx="1" fill="#c98a4b" stroke="#7a4a1c" stroke-width=".6"/>`,
+ /* cañón */ `<g transform="rotate(-22 0 0)"><rect x="-9.4" y="-3.6" width="16.6" height="5.6" rx="2.6" fill="#22262d" stroke="#0e1014" stroke-width=".7"/><rect x="5.4" y="-4.2" width="2.6" height="6.8" rx="1" fill="#3a3f47"/></g><circle cx="-1.6" cy="4.4" r="4.4" fill="#8a5a2b" stroke="#4a2e10" stroke-width=".9"/><circle cx="-1.6" cy="4.4" r="1.2" fill="#4a2e10"/><path d="M-1.6 0.4V8.4M-5.6 4.4H2.4" stroke="#4a2e10" stroke-width=".8"/>`
+];
+const NTOK=TOKART.length;
 function tokenShape(k,x,y,r,lab){
-  lab=lab||String(k+1);const fs=(r*(lab.length>2?.62:lab.length>1?.78:.95)).toFixed(1);
-  if(k===3){const p=(a,b)=>(x+a*r).toFixed(2)+","+(y+b*r).toFixed(2);
-    return `<g filter="url(#tksh)"><polygon points="${p(-1,-.25)} ${p(-.55,-.85)} ${p(.55,-.85)} ${p(1,-.25)} ${p(0,1.05)}" fill="url(#tk3)" stroke="${RIM[3]}" stroke-width="${(r*.12).toFixed(2)}" stroke-linejoin="round"/>
-    <path d="M${p(-1,-.25)}L${p(1,-.25)}M${p(-.55,-.85)}L${p(-.3,-.25)}L${p(0,1.05)}L${p(.3,-.25)}L${p(.55,-.85)}M${p(-.3,-.25)}L${p(0,-.85)}L${p(.3,-.25)}" fill="none" stroke="#fff" stroke-width="${(r*.07).toFixed(2)}" stroke-opacity=".85"/>
-    <text x="${x.toFixed(2)}" y="${(y+r*.02).toFixed(2)}" text-anchor="middle" font-family="Archivo,sans-serif" font-weight="900" font-size="${fs}" fill="#0c3a63" stroke="#f2fdff" stroke-width="${(r*.12).toFixed(2)}" paint-order="stroke">${lab}</text></g>`}
-  return `<g filter="url(#tksh)"><circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${r}" fill="url(#tk${k})" stroke="${RIM[k]}" stroke-width="${(r*.14).toFixed(2)}"/>
-   <circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${(r*.68).toFixed(2)}" fill="none" stroke="${RIM[k]}" stroke-width="${(r*.08).toFixed(2)}" stroke-opacity=".7"/>
-   <text x="${x.toFixed(2)}" y="${(y+r*.22).toFixed(2)}" text-anchor="middle" font-family="Archivo,sans-serif" font-weight="900" font-size="${fs}" fill="${RIM[k]}" letter-spacing="-.2">${lab}</text>
-   <ellipse cx="${(x-r*.32).toFixed(2)}" cy="${(y-r*.42).toFixed(2)}" rx="${(r*.38).toFixed(2)}" ry="${(r*.18).toFixed(2)}" fill="#fff" opacity=".55" transform="rotate(-25 ${(x-r*.32).toFixed(2)} ${(y-r*.42).toFixed(2)})"/></g>`;
+  k=(k>=0&&k<NTOK)?k:0;const X=x.toFixed(2),Y=y.toFixed(2),sc=(r*.082).toFixed(3);
+  let out=`<g filter="url(#tksh)"><circle cx="${X}" cy="${Y}" r="${r}" fill="${TOKBG[k]}" stroke="${TOKRIM[k]}" stroke-width="${(r*.14).toFixed(2)}"/>
+   <g transform="translate(${X} ${Y}) scale(${sc})">${TOKART[k]}</g>
+   <ellipse cx="${(x-r*.34).toFixed(2)}" cy="${(y-r*.46).toFixed(2)}" rx="${(r*.34).toFixed(2)}" ry="${(r*.15).toFixed(2)}" fill="#fff" opacity=".28" transform="rotate(-25 ${(x-r*.34).toFixed(2)} ${(y-r*.46).toFixed(2)})"/></g>`;
+  if(lab&&lab!==" "){const w=(lab.length*r*.42+r*.5).toFixed(2),h=(r*.62).toFixed(2);
+    out+=`<g pointer-events="none"><rect x="${(x-w/2).toFixed(2)}" y="${(y+r*.72).toFixed(2)}" width="${w}" height="${h}" rx="${(h/2).toFixed(2)}" fill="#ffffff" stroke="#14203f" stroke-width="${(r*.07).toFixed(2)}"/><text x="${X}" y="${(y+r*.72+h*.76).toFixed(2)}" text-anchor="middle" font-family="Archivo,sans-serif" font-weight="900" font-size="${(r*.5).toFixed(2)}" fill="#14203f">${lab}</text></g>`}
+  return out;
 }
-function tokIcon(k,size,lab){return `<svg class="ptok" width="${size}" height="${size}" viewBox="0 0 30 30" role="img" aria-label="Ficha ${TOKN[k]}${lab?" "+lab:""}">${tokenShape(k,15,15,12,lab)}</svg>`}
+function tokIcon(k,size,lab){return `<svg class="ptok" width="${size}" height="${size}" viewBox="0 0 30 30" role="img" aria-label="${lab&&lab!==" "?"Ficha de "+esc(lab):"Ficha"}">${tokenShape(k,15,15,12)}</svg>`}
 
 const SRC={
  pc_vox:["papeletaclara.es · Vox","https://papeletaclara.es/partidos/vox/"],
@@ -489,13 +504,13 @@ function cur(){return S.players[S.turn]}
 function has6(p){return p.w.every(Boolean)}
 function myTurn(){if(!S||!S.players.length)return false;if(ROLE==="local")return true;const p=cur();return !!p&&p.id===CID}
 function rnd6(){return Math.floor(Math.random()*6)}
-function newPlayer(n,id,k,tk){return {n:clean(n)||"Jugador "+(k+1),id,tk:(tk>=0&&tk<4)?tk:k,pos:START[k],w:[0,0,0,0,0,0],ok:0,tot:0}}
+function newPlayer(n,id,k,tk){return {n:clean(n)||"Jugador "+(k+1),id,tk:(tk>=0&&tk<NTOK)?tk:k,pos:START[k],w:[0,0,0,0,0,0],ok:0,tot:0}}
 function pct(p){return p&&p.tot?Math.round(100*p.ok/p.tot)+" %":"0 %"}
-function TK(k){const p=S&&S.players[k];return p&&p.tk>=0&&p.tk<4?p.tk:k}
-function freeTok(pref,except){const used=S?S.players.filter(p=>p!==except).map((p,k)=>p.tk):[];if(pref>=0&&pref<4&&!used.includes(pref))return pref;for(let t=0;t<4;t++)if(!used.includes(t))return t;return 0}
+function TK(k){const p=S&&S.players[k];return p&&p.tk>=0&&p.tk<NTOK?p.tk:k}
+function freeTok(pref,except){const used=S?S.players.filter(p=>p!==except).map((p,k)=>p.tk):[];if(pref>=0&&pref<NTOK&&!used.includes(pref))return pref;for(let t=0;t<NTOK;t++)if(!used.includes(t))return t;return 0}
 let setupTok=[0,1,2,3];
-let myTk=(()=>{try{const v=+localStorage.getItem("gj-tok");return v>=0&&v<4?v:0}catch(e){return 0}})();
-function tokPicker(sel,taken,attr){return `<div class="tokpick" role="radiogroup" aria-label="Elige ficha">${[0,1,2,3].map(t=>{const own=taken[t];return `<button type="button" class="tp${t===sel?" on":""}" role="radio" aria-checked="${t===sel}" ${attr}="${t}" ${own&&t!==sel?`disabled title="${esc(own)}"`:""} aria-label="${TOKN[t]}${own&&t!==sel?" (de "+esc(own)+")":""}">${tokIcon(t,26," ")}${own&&t!==sel?`<small>${esc(own.slice(0,3).toUpperCase())}</small>`:""}</button>`}).join("")}</div>`}
+let myTk=(()=>{try{const v=+localStorage.getItem("gj-tok");return v>=0&&v<NTOK?v:0}catch(e){return 0}})();
+function tokPicker(sel,taken,attr){return `<div class="tokpick" role="radiogroup" aria-label="Elige ficha">${TOKN.map((_,t)=>t).map(t=>{const own=taken[t];return `<button type="button" class="tp${t===sel?" on":""}" role="radio" aria-checked="${t===sel}" ${attr}="${t}" ${own&&t!==sel?`disabled title="${esc(own)}"`:""} aria-label="${TOKN[t]}${own&&t!==sel?" (de "+esc(own)+")":""}">${tokIcon(t,26," ")}${own&&t!==sel?`<small>${esc(own.slice(0,3).toUpperCase())}</small>`:""}</button>`}).join("")}</div>`}
 function newState(players,phase){return {v:3,players,turn:0,phase,roll:0,targets:[],q:null,last:null,fx:null,seq:0,winner:null,msg:"",decks:CATS.map((_,c)=>freshDeck(c)),la:{}}}
 
 /* ---------- motor del juego (mismo para local y online) ---------- */
@@ -628,7 +643,7 @@ function onPeers(){
       let idx=S.players.findIndex(x=>x.id===pp.id);const nm=clean(pp.n);
       if(idx<0&&S.phase==="lobby"&&S.players.length<(S.need||4)&&nm){let un=nm,k=2;while(S.players.some(x=>x.n===un))un=nm+" "+(k++);S.players.push(newPlayer(un,pp.id,S.players.length,freeTok(pp.tk)));idx=S.players.length-1;changed=true}
       else if(idx>=0&&S.phase==="lobby"&&nm&&nm!==S.players[idx].n){S.players[idx].n=nm;changed=true}
-      if(idx>=0&&S.phase==="lobby"&&pp.tk>=0&&pp.tk<4&&pp.tk!==S.players[idx].tk&&freeTok(pp.tk,S.players[idx])===pp.tk){S.players[idx].tk=pp.tk;changed=true}
+      if(idx>=0&&S.phase==="lobby"&&pp.tk>=0&&pp.tk<NTOK&&pp.tk!==S.players[idx].tk&&freeTok(pp.tk,S.players[idx])===pp.tk){S.players[idx].tk=pp.tk;changed=true}
       const ac=pp.act;
       if(idx>=0&&ac&&typeof ac.s==="number"&&ac.s>(S.la[pp.id]||0)){
         S.la[pp.id]=ac.s;
@@ -703,7 +718,7 @@ function homeHTML(){
     ${tab==="local"?`
     <div class="tag">Jugadores</div>
     <div class="cnt" role="group" aria-label="Número de jugadores">${[1,2,3,4].map(n=>`<button id="n${n}" aria-pressed="${n===setupCount}">${n}</button>`).join("")}</div>
-    <div class="names">${Array.from({length:setupCount},(_,k)=>`<div class="prow"><label for="nm${k}"><span id="ti${k}">${tokIcon(setupTok[k],30,abbrs(Array.from({length:setupCount},(_,j)=>setupNames[j]||"Jugador "+(j+1)))[k])}</span><input id="nm${k}" maxlength="30" placeholder="Jugador ${k+1} · ${TOKN[setupTok[k]]}" value="${esc(setupNames[k])}"></label><div class="tokpick sm" role="radiogroup" aria-label="Ficha del jugador ${k+1}">${[0,1,2,3].map(t=>`<button type="button" class="tp${t===setupTok[k]?" on":""}" role="radio" aria-checked="${t===setupTok[k]}" data-row="${k}" data-tok="${t}" aria-label="${TOKN[t]}">${tokIcon(t,24," ")}</button>`).join("")}</div></div>`).join("")}</div>
+    <div class="names">${Array.from({length:setupCount},(_,k)=>`<div class="prow"><label for="nm${k}"><span id="ti${k}">${tokIcon(setupTok[k],30,abbrs(Array.from({length:setupCount},(_,j)=>setupNames[j]||"Jugador "+(j+1)))[k])}</span><input id="nm${k}" maxlength="30" placeholder="Jugador ${k+1}" value="${esc(setupNames[k])}"></label><div class="tokpick sm" role="radiogroup" aria-label="Ficha del jugador ${k+1}">${TOKN.map((_,t)=>t).map(t=>`<button type="button" class="tp${t===setupTok[k]?" on":""}" role="radio" aria-checked="${t===setupTok[k]}" data-row="${k}" data-tok="${t}" aria-label="${TOKN[t]}">${tokIcon(t,24," ")}</button>`).join("")}</div></div>`).join("")}</div>
     <p class="note">Elige la ficha de cada jugador. Si eliges una que ya tiene otro, os la intercambiáis.</p>
     <div class="row"><button class="btn" id="go">Empezar partida</button>${saved&&saved.phase!=="win"?`<button class="btn ghost" id="resume">Continuar partida guardada</button>`:""}</div>`
     :`
@@ -744,7 +759,7 @@ function lobbyHTML(){
     <div class="tag">Jugadores (${S.players.length}/${S.need||4})</div>
     <p class="msg">${S.players.length<(S.need||4)?`Faltan ${(S.need||4)-S.players.length}. La partida empezará sola cuando se unan todos.`:"¡Ya estáis todos!"}</p>
     ${(()=>{const me=S.players.find(p=>p.id===CID);if(!me)return "";const taken={};S.players.forEach(p=>{if(p!==me)taken[p.tk]=p.n});return `<div class="tag">Elige tu ficha</div>${tokPicker(me.tk,taken,"data-mytok")}`})()}
-    <div class="players">${S.players.map((q,k)=>`<div class="pl"><span>${tokIcon(TK(k),32,labs()[k])}</span><span class="nm">${esc(q.n)}${q.id===CID?" (tú)":""}<small>${TOKN[TK(k)]}${k===0?" · anfitrión":""}</small></span></div>`).join("")}</div>
+    <div class="players">${S.players.map((q,k)=>`<div class="pl"><span>${tokIcon(TK(k),32,labs()[k])}</span><span class="nm">${esc(q.n)}${q.id===CID?" (tú)":""}<small>${k===0?"Anfitrión":"Jugador"}</small></span></div>`).join("")}</div>
     ${host?(S.players.length>=2?`<div class="row"><button class="btn ghost" id="start">Empezar ya con ${S.players.length}</button></div>`:""):`<p class="note">Esperando al resto de jugadores…</p>`}
     ${!host&&!hostHere?`<p class="note">El anfitrión no aparece conectado ahora mismo.</p>`:""}
     ${netMsg?`<p class="msg" role="status">${esc(netMsg)}</p>`:""}
@@ -762,13 +777,13 @@ function gameHTML(){
   return `${online?`<div class="netbar"><span>Online · código <b>${esc(code.toUpperCase())}</b></span>${ROLE==="guest"&&!hostHere?`<span class="warn">Anfitrión desconectado</span>`:""}<button class="mini bell" id="bell" aria-pressed="${alertsOn}" title="Avisos de turno">${alertsOn?"🔔 Avisos":"🔕 Avisos"}</button><a class="mini" href="${waLink()}" target="_blank" rel="noopener">Invitar</a></div>`:""}
   <section class="panel">
     <div class="boardwrap">${boardSVG()}</div>
-    <div class="turn"><div class="tleft">${tokIcon(TK(S.turn),40,L[S.turn])}<span class="who">${esc(p.n)}${online&&p.id===CID?" (tú)":""}<span class="tname">Ficha: ${TOKN[TK(S.turn)]}</span></span></div><div class="tmid">${pie3d(p.w,`${p.w.filter(Boolean).length} de 6 quesitos`)}</div><div class="tright">${dieHTML(S.roll,mine&&!pending&&S.phase==="roll"&&!(has6(p)&&p.pos===C))}</div></div>
+    <div class="turn"><div class="tleft">${tokIcon(TK(S.turn),40,L[S.turn])}<span class="who">${esc(p.n)}${online&&p.id===CID?" (tú)":""}<span class="tname">Es su turno</span></span></div><div class="tmid">${pie3d(p.w,`${p.w.filter(Boolean).length} de 6 quesitos`)}</div><div class="tright">${dieHTML(S.roll,mine&&!pending&&S.phase==="roll"&&!(has6(p)&&p.pos===C))}</div></div>
     <p class="msg" aria-live="polite">${esc(netMsg||S.msg)}</p>
     <div class="row">${ctrl}</div>
   </section>
   <section class="panel">
     <div class="tag">Marcador</div>
-    <div class="players">${S.players.map((q,k)=>`<div class="pl${k===S.turn?" cur":""}">${tokIcon(TK(k),32,L[k])}<span class="nm">${esc(q.n)}${online&&q.id===CID?" (tú)":""}<small>${TOKN[TK(k)]} · ${q.ok} aciertos de ${q.tot} (${pct(q)}) · ${q.w.filter(Boolean).length}/6 quesitos</small></span>${pie(q.w,30)}</div>`).join("")}</div>
+    <div class="players">${S.players.map((q,k)=>`<div class="pl${k===S.turn?" cur":""}">${tokIcon(TK(k),32,L[k])}<span class="nm">${esc(q.n)}${online&&q.id===CID?" (tú)":""}<small>${q.ok} aciertos de ${q.tot} (${pct(q)}) · ${q.w.filter(Boolean).length}/6 quesitos</small></span>${pie(q.w,30)}</div>`).join("")}</div>
     <div class="row"><button class="btn ghost" id="quit">${online?"Salir de la partida":"Volver al inicio"}</button></div>
   </section>`;
 }
