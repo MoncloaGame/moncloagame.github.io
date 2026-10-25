@@ -1,0 +1,17 @@
+{
+  "name": "Moncloa Game",
+  "short_name": "Moncloa Game",
+  "description": "El juego de preguntas sobre política española. ¿Llegarás a La Moncloa?",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#14254f",
+  "theme_color": "#14254f",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
