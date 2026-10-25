@@ -237,8 +237,8 @@ svg.board{width:100%;height:auto;display:block}
  <filter id="tksh" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="1.5" stdDeviation="1.4" flood-color="#000" flood-opacity=".6"/></filter>
 </defs></svg>
 
-<script src="config.js?v=1792966686"></script>
-<script src="net.js?v=1792966686"></script>
+<script src="config.js?v=1792968046"></script>
+<script src="net.js?v=1792968046"></script>
 <script>
 const ART_URL=location.origin+location.pathname;
 const PARTY={VOX:"Vox",PP:"PP",PSOE:"PSOE",IZQ:"Frente Amplio / Podemos"};
@@ -490,6 +490,7 @@ function has6(p){return p.w.every(Boolean)}
 function myTurn(){if(!S||!S.players.length)return false;if(ROLE==="local")return true;const p=cur();return !!p&&p.id===CID}
 function rnd6(){return Math.floor(Math.random()*6)}
 function newPlayer(n,id,k,tk){return {n:clean(n)||"Jugador "+(k+1),id,tk:(tk>=0&&tk<4)?tk:k,pos:START[k],w:[0,0,0,0,0,0],ok:0,tot:0}}
+function pct(p){return p&&p.tot?Math.round(100*p.ok/p.tot)+" %":"0 %"}
 function TK(k){const p=S&&S.players[k];return p&&p.tk>=0&&p.tk<4?p.tk:k}
 function freeTok(pref,except){const used=S?S.players.filter(p=>p!==except).map((p,k)=>p.tk):[];if(pref>=0&&pref<4&&!used.includes(pref))return pref;for(let t=0;t<4;t++)if(!used.includes(t))return t;return 0}
 let setupTok=[0,1,2,3];
@@ -767,7 +768,7 @@ function gameHTML(){
   </section>
   <section class="panel">
     <div class="tag">Marcador</div>
-    <div class="players">${S.players.map((q,k)=>`<div class="pl${k===S.turn?" cur":""}">${tokIcon(TK(k),32,L[k])}<span class="nm">${esc(q.n)}${online&&q.id===CID?" (tú)":""}<small>${TOKN[TK(k)]} · ${q.ok} aciertos de ${q.tot} · ${q.w.filter(Boolean).length}/6 quesitos</small></span>${pie(q.w,30)}</div>`).join("")}</div>
+    <div class="players">${S.players.map((q,k)=>`<div class="pl${k===S.turn?" cur":""}">${tokIcon(TK(k),32,L[k])}<span class="nm">${esc(q.n)}${online&&q.id===CID?" (tú)":""}<small>${TOKN[TK(k)]} · ${q.ok} aciertos de ${q.tot} (${pct(q)}) · ${q.w.filter(Boolean).length}/6 quesitos</small></span>${pie(q.w,30)}</div>`).join("")}</div>
     <div class="row"><button class="btn ghost" id="quit">${online?"Salir de la partida":"Volver al inicio"}</button></div>
   </section>`;
 }
@@ -960,7 +961,7 @@ function playFx(f){
       <div class="fx-name">${esc(who)}</div>
       <div class="flag" aria-hidden="true"><i></i><i></i><i></i></div>
       <div class="fx-pres">¡Enhorabuena al nuevo Presidente del Gobierno de España!</div>
-      <div class="fx-who">6 quesitos · ${p.ok} aciertos de ${p.tot} · La Moncloa te espera</div>
+      <div class="fx-who">6 quesitos · ${p.ok} aciertos de ${p.tot} (${pct(p)}) · La Moncloa te espera</div>
       <div class="row" style="justify-content:center"><button class="btn light" id="fxclose">Ver el tablero</button>${ROLE==="guest"?"":`<button class="btn fosfo" id="fxnew">Nueva partida</button>`}</div>
     </div>`;
   fxEl.hidden=false;fxEl.onclick=null;
