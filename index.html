@@ -224,7 +224,7 @@ svg.board{width:100%;height:auto;display:block}
     <div><div class="tag">Política española · 29N 2026</div><h1>Moncloa Game</h1></div>
   </header>
   <div id="app"></div>
-  <p class="note">Las preguntas salen de anuncios de campaña, programas, noticias y fuentes públicas de consulta como Wikipedia, a 25 de octubre de 2026. Las de corrupción solo recogen condenas, procesamientos o investigaciones públicas, y cada respuesta indica su fuente. En las preguntas de propuestas, Frente Amplio y Podemos cuentan como una sola opción.</p>
+  <p class="note">Las preguntas salen de anuncios de campaña, programas, noticias y fuentes públicas de consulta como Wikipedia, a 25 de octubre de 2026. Cada respuesta indica su fuente. En las preguntas de propuestas, Frente Amplio y Podemos cuentan como una sola opción.</p>
 </div>
 <p class="note installhint" id="installhint"><b>Instálalo como app:</b> en iPhone, abre esta página en Safari y pulsa Compartir → «Añadir a pantalla de inicio». En Android, menú ⋮ → «Instalar aplicación». <button class="btn ghost" id="installbtn" hidden>Instalar Moncloa Game</button></p>
 <div id="ov" class="ov" hidden></div>
@@ -239,8 +239,8 @@ svg.board{width:100%;height:auto;display:block}
  <filter id="tksh" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="1.5" stdDeviation="1.4" flood-color="#000" flood-opacity=".6"/></filter>
 </defs></svg>
 
-<script src="config.js?v=1792971193"></script>
-<script src="net.js?v=1792971193"></script>
+<script src="config.js?v=1792971347"></script>
+<script src="net.js?v=1792971347"></script>
 <script>
 const ART_URL=location.origin+location.pathname;
 const PARTY={VOX:"Vox",PP:"PP",PSOE:"PSOE",IZQ:"Frente Amplio / Podemos"};
@@ -747,7 +747,7 @@ function homeHTML(){
       <li>Con los 6 quesitos, vuelve al centro: el Rey te pondrá la prueba final. Responde 6 preguntas seguidas y acierta al menos 4 para llegar a La Moncloa.</li>
     </ul>
     <ul class="legend">${CATS.map((n,c)=>`<li><span class="sw" style="background:${CCOL[c]}"></span>${n}</li>`).join("")}</ul>
-    <p class="note">${NQ} preguntas: propuestas del 29N, historia reciente, corrupción y anécdotas políticas.</p>
+    <p class="note">${NQ} preguntas: propuestas del 29N, historia reciente, instituciones, elecciones y anécdotas políticas.</p>
   </section>`;
 }
 function lobbyHTML(){
