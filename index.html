@@ -239,8 +239,8 @@ svg.board{width:100%;height:auto;display:block}
  <filter id="tksh" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="1.5" stdDeviation="1.4" flood-color="#000" flood-opacity=".6"/></filter>
 </defs></svg>
 
-<script src="config.js?v=1792971347"></script>
-<script src="net.js?v=1792971347"></script>
+<script src="config.js?v=1793009670"></script>
+<script src="net.js?v=1793009670"></script>
 <script>
 const ART_URL=location.origin+location.pathname;
 const PARTY={VOX:"Vox",PP:"PP",PSOE:"PSOE",IZQ:"Frente Amplio / Podemos"};
@@ -249,7 +249,7 @@ const CATS=["Instituciones y organización del Estado","Partidos políticos","L�
 const CCOL=["#1e7be6","#e3262f","#9a2fd0","#16a957","#ff8a00","#ffd400"];
 const CTXT=["#fff","#fff","#fff","#fff","#14203f","#14203f"];
 const PCOL=["#f5c542","#c9ced6","#cd7f32","#8fe3ff"];
-const TOKN=["Martillo y hoz","Gaviota","Flor","Trébol","Diamante","Balanza","Mallete","Cañón","Cruz","Corona","Estrella","Senyera","Ikurriña","Bandera gallega"];
+const TOKN=["Martillo y hoz","Gaviota","Flor","Trébol","Diamante","Balanza","Mallete","Bandera de España","Cruz","Corona","Estrella","Senyera","Ikurriña","Bandera gallega"];
 const RIM=["#7a5304","#5b616b","#5a300c","#1d6fa5"];
 function abbrs(names){
   const b=names.map((n,k)=>{const c=(n||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^A-Za-z0-9]/g,"").toUpperCase();return c.slice(0,3)||("J"+(k+1))});
@@ -257,8 +257,8 @@ function abbrs(names){
 }
 function labs(){return abbrs(S.players.map(p=>p.n))}
 /* fichas: disco de color con una figura dentro (coordenadas de -10 a 10) */
-const TOKBG=["#c8102e","#1d8fe0","#ffffff","#ffffff","#14254f","#6a2fb0","#f6ecd9","#e9eef4","#1b2a5c","#8b0f24","#0d6e6e","#fcdd09","#d52b1e","#ffffff"];
-const TOKRIM=["#7a0a1b","#0b4f86","#a3141c","#1f8a3a","#5fd3ff","#3d1670","#7a4a1c","#3a3f47","#f2c94c","#f2c94c","#ffd400","#9a0b10","#0b5e2f","#0077a8"];
+const TOKBG=["#c8102e","#1d8fe0","#ffffff","#ffffff","#14254f","#6a2fb0","#f6ecd9","#ffc400","#1b2a5c","#8b0f24","#0d6e6e","#fcdd09","#d52b1e","#ffffff"];
+const TOKRIM=["#7a0a1b","#0b4f86","#a3141c","#1f8a3a","#5fd3ff","#3d1670","#7a4a1c","#8a0f1a","#f2c94c","#f2c94c","#ffd400","#9a0b10","#0b5e2f","#0077a8"];
 const TOKART=[
  /* martillo y hoz */ `<g fill="none" stroke="#ffd400" stroke-width="2.4" stroke-linecap="round"><path d="M-5.5 6.5A8 8 0 1 0 6.5 -5.5"/><path d="M-5.5 6.5L-8.3 9.3"/><path d="M-4.2 -2.4L7.2 9"/></g><path d="M-9.2 -5.6L-4.8 -10L-1.4 -6.6L-5.8 -2.2Z" fill="#ffd400"/>`,
  /* gaviota */ `<path d="M-10 -0.5Q-5.5 -7 -0.6 0.4Q0 1.4 0.6 0.4Q5.5 -7 10 -0.5Q5.5 -3.6 0.9 3Q0 4.3 -0.9 3Q-5.5 -3.6 -10 -0.5Z" fill="#fff"/><path d="M-7 5.5Q-4.2 2.4 -1.6 5.6Q-4.2 4.3 -7 5.5Z" fill="#fff" opacity=".85"/>`,
@@ -267,7 +267,7 @@ const TOKART=[
  /* diamante */ `<path d="M-8.4 -2.4L-4.8 -7.4H4.8L8.4 -2.4L0 8.6Z" fill="#8fe3ff" stroke="#e8fbff" stroke-width=".9" stroke-linejoin="round"/><path d="M-8.4 -2.4H8.4M-4.8 -7.4L-2.4 -2.4L0 8.6L2.4 -2.4L4.8 -7.4M-2.4 -2.4L0 -7.4L2.4 -2.4" fill="none" stroke="#2b8fd6" stroke-width=".8"/>`,
  /* balanza */ `<g fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M0 -8.6V7.4M-4.6 8.6H4.6M-8 -5.4H8M-8 -5.4L-10 1M-8 -5.4L-6 1M8 -5.4L6 1M8 -5.4L10 1"/></g><path d="M-10.6 1H-5.4A2.6 2.6 0 0 1 -10.6 1ZM5.4 1H10.6A2.6 2.6 0 0 1 5.4 1Z" fill="#ffd400"/><circle cx="0" cy="-8.6" r="1.4" fill="#ffd400"/>`,
  /* mallete de juez */ `<g transform="rotate(-40 -1 -2)"><rect x="-8" y="-8.4" width="11" height="5.6" rx="1.4" fill="#c98a4b" stroke="#7a4a1c" stroke-width=".8"/><rect x="-9" y="-8.9" width="2" height="6.6" rx=".8" fill="#e2b07a"/><rect x="2" y="-8.9" width="2" height="6.6" rx=".8" fill="#e2b07a"/><rect x="-3.4" y="-3" width="2.2" height="11" rx="1" fill="#c98a4b" stroke="#7a4a1c" stroke-width=".6"/></g><rect x="1.4" y="6.4" width="8.4" height="3" rx="1" fill="#c98a4b" stroke="#7a4a1c" stroke-width=".6"/>`,
- /* cañón */ `<g transform="rotate(-22 0 0)"><rect x="-9.4" y="-3.6" width="16.6" height="5.6" rx="2.6" fill="#22262d" stroke="#0e1014" stroke-width=".7"/><rect x="5.4" y="-4.2" width="2.6" height="6.8" rx="1" fill="#3a3f47"/></g><circle cx="-1.6" cy="4.4" r="4.4" fill="#8a5a2b" stroke="#4a2e10" stroke-width=".9"/><circle cx="-1.6" cy="4.4" r="1.2" fill="#4a2e10"/><path d="M-1.6 0.4V8.4M-5.6 4.4H2.4" stroke="#4a2e10" stroke-width=".8"/>`,
+ /* bandera de España */ `<g clip-path="url(#tkclip)"><rect x="-13" y="-13" width="26" height="26" fill="#ffc400"/><rect x="-13" y="-13" width="26" height="7.1" fill="#c60b1e"/><rect x="-13" y="5.9" width="26" height="7.1" fill="#c60b1e"/></g>`,
  /* cruz */ `<path d="M-1.9 -10H1.9V-4.6H6.6V-1H1.9V10H-1.9V-1H-6.6V-4.6H-1.9Z" fill="#f2c94c" stroke="#8a6a12" stroke-width=".8" stroke-linejoin="round"/>`,
  /* corona real */ `<g transform="translate(0 1.2) scale(.84)"><path d="M-8.6 4L-9.6 -5.4L-4.4 -1.2L0 -8.6L4.4 -1.2L9.6 -5.4L8.6 4Z" fill="#f2c94c" stroke="#8a6a12" stroke-width=".8" stroke-linejoin="round"/><rect x="-8.8" y="4" width="17.6" height="3.6" rx=".8" fill="#f2c94c" stroke="#8a6a12" stroke-width=".8"/><circle cx="-9.6" cy="-5.8" r="1.3" fill="#e3262f"/><circle cx="0" cy="-9" r="1.3" fill="#e3262f"/><circle cx="9.6" cy="-5.8" r="1.3" fill="#e3262f"/><circle cx="-4" cy="5.8" r=".9" fill="#1e7be6"/><circle cx="0" cy="5.8" r=".9" fill="#e3262f"/><circle cx="4" cy="5.8" r=".9" fill="#16a957"/></g>`,
  /* estrella */ `<path d="${Array.from({length:10},(_,i)=>{const a=(-90+i*36)*Math.PI/180,rr=i%2?4:9.6;return (i?"L":"M")+(rr*Math.cos(a)).toFixed(2)+" "+(rr*Math.sin(a)+0.8).toFixed(2)}).join("")}Z" fill="#ffd400" stroke="#b38f00" stroke-width=".8" stroke-linejoin="round"/>`,
@@ -515,7 +515,7 @@ function TK(k){const p=S&&S.players[k];return p&&p.tk>=0&&p.tk<NTOK?p.tk:k}
 function freeTok(pref,except){const used=S?S.players.filter(p=>p!==except).map((p,k)=>p.tk):[];if(pref>=0&&pref<NTOK&&!used.includes(pref))return pref;for(let t=0;t<NTOK;t++)if(!used.includes(t))return t;return 0}
 let setupTok=[0,1,2,3];
 let myTk=(()=>{try{const v=+localStorage.getItem("gj-tok");return v>=0&&v<NTOK?v:0}catch(e){return 0}})();
-function tokPicker(sel,taken,attr){return `<div class="tokpick" role="radiogroup" aria-label="Elige ficha">${TOKN.map((_,t)=>t).map(t=>{const own=taken[t];return `<button type="button" class="tp${t===sel?" on":""}" role="radio" aria-checked="${t===sel}" ${attr}="${t}" ${own&&t!==sel?`disabled title="${esc(own)}"`:""} aria-label="${TOKN[t]}${own&&t!==sel?" (de "+esc(own)+")":""}">${tokIcon(t,26," ")}${own&&t!==sel?`<small>${esc(own.slice(0,3).toUpperCase())}</small>`:""}</button>`}).join("")}</div>`}
+function tokPicker(sel,taken,attr){return `<div class="tokpick" role="radiogroup" aria-label="Elige ficha">${TOKN.map((_,t)=>t).map(t=>{const own=taken[t];return `<button type="button" class="tp${t===sel?" on":""}" role="radio" aria-checked="${t===sel}" ${attr}="${t}" ${own&&t!==sel?`disabled title="${esc(own)}"`:""} aria-label="${TOKN[t]}${own&&t!==sel?" (de "+esc(own)+")":""}">${tokIcon(t,36," ")}${own&&t!==sel?`<small>${esc(own.slice(0,3).toUpperCase())}</small>`:""}</button>`}).join("")}</div>`}
 function newState(players,phase){return {v:3,players,turn:0,phase,roll:0,targets:[],q:null,last:null,fx:null,seq:0,winner:null,msg:"",decks:CATS.map((_,c)=>freshDeck(c)),la:{}}}
 
 /* ---------- motor del juego (mismo para local y online) ---------- */
@@ -723,7 +723,7 @@ function homeHTML(){
     ${tab==="local"?`
     <div class="tag">Jugadores</div>
     <div class="cnt" role="group" aria-label="Número de jugadores">${[1,2,3,4].map(n=>`<button id="n${n}" aria-pressed="${n===setupCount}">${n}</button>`).join("")}</div>
-    <div class="names">${Array.from({length:setupCount},(_,k)=>`<div class="prow"><label for="nm${k}"><span id="ti${k}">${tokIcon(setupTok[k],30,abbrs(Array.from({length:setupCount},(_,j)=>setupNames[j]||"Jugador "+(j+1)))[k])}</span><input id="nm${k}" maxlength="30" placeholder="Jugador ${k+1}" value="${esc(setupNames[k])}"></label><div class="tokpick sm" role="radiogroup" aria-label="Ficha del jugador ${k+1}">${TOKN.map((_,t)=>t).map(t=>`<button type="button" class="tp${t===setupTok[k]?" on":""}" role="radio" aria-checked="${t===setupTok[k]}" data-row="${k}" data-tok="${t}" aria-label="${TOKN[t]}">${tokIcon(t,24," ")}</button>`).join("")}</div></div>`).join("")}</div>
+    <div class="names">${Array.from({length:setupCount},(_,k)=>`<div class="prow"><label for="nm${k}"><span id="ti${k}">${tokIcon(setupTok[k],30,abbrs(Array.from({length:setupCount},(_,j)=>setupNames[j]||"Jugador "+(j+1)))[k])}</span><input id="nm${k}" maxlength="30" placeholder="Jugador ${k+1}" value="${esc(setupNames[k])}"></label><div class="tokpick sm" role="radiogroup" aria-label="Ficha del jugador ${k+1}">${TOKN.map((_,t)=>t).map(t=>`<button type="button" class="tp${t===setupTok[k]?" on":""}" role="radio" aria-checked="${t===setupTok[k]}" data-row="${k}" data-tok="${t}" aria-label="${TOKN[t]}">${tokIcon(t,30," ")}</button>`).join("")}</div></div>`).join("")}</div>
     <p class="note">Elige la ficha de cada jugador. Si eliges una que ya tiene otro, os la intercambiáis.</p>
     <div class="row"><button class="btn" id="go">Empezar partida</button>${saved&&saved.phase!=="win"?`<button class="btn ghost" id="resume">Continuar partida guardada</button>`:""}</div>`
     :`
@@ -748,6 +748,20 @@ function homeHTML(){
     </ul>
     <ul class="legend">${CATS.map((n,c)=>`<li><span class="sw" style="background:${CCOL[c]}"></span>${n}</li>`).join("")}</ul>
     <p class="note">${NQ} preguntas: propuestas del 29N, historia reciente, instituciones, elecciones y anécdotas políticas.</p>
+  </section>`;
+}
+let inviteCode=null;
+function inviteHTML(){
+  return `<section class="panel invite">
+    <div class="lobbylogo">${logoSVG(110)}</div>
+    <h2>¡Te han invitado a una partida!</h2>
+    <p class="msg">Nunca estuviste tan cerca de llegar a La Moncloa. Escribe tu nombre y elige tu figura para entrar.</p>
+    <label class="field" for="invname">Tu nombre<input id="invname" maxlength="30" value="${esc(myName)}" placeholder="Cómo te verán los demás" autocomplete="nickname"></label>
+    <div class="tag">Elige tu figura</div>
+    ${tokPicker(myTk,{},"data-invtok")}
+    ${netMsg?`<p class="msg" role="status">${esc(netMsg)}</p>`:""}
+    <div class="row"><button class="btn" id="invgo">Entrar en la partida</button><button class="btn ghost" id="invno">Ahora no</button></div>
+    <p class="note">Código de la partida: <b>${esc(String(inviteCode).toUpperCase())}</b>. Si alguien ya tiene tu figura, te tocará otra libre y podrás cambiarla en la sala de espera.</p>
   </section>`;
 }
 function lobbyHTML(){
@@ -794,6 +808,7 @@ function gameHTML(){
 }
 function render(){
   if(ROLE==="guest"&&!S)app.innerHTML=`<section class="panel"><h2>Uniéndote a ${esc(code.toUpperCase())}…</h2><p class="msg">${esc(netMsg||"Buscando al anfitrión de la partida. Si acaba de enviarte el enlace, espera a que vuelva a abrir el juego.")}</p><div class="row">${netMsg?`<button class="btn" id="retry">Reintentar</button>`:""}<button class="btn ghost" id="leave">Cancelar</button></div></section>`;
+  else if(!S&&inviteCode)app.innerHTML=inviteHTML();
   else if(!S)app.innerHTML=homeHTML();
   else if(S.phase==="lobby")app.innerHTML=lobbyHTML();
   else app.innerHTML=gameHTML();
@@ -856,6 +871,11 @@ function bind(){
   [2,3,4].forEach(n=>{if(b("on"+n))b("on"+n).onclick=()=>{grab();onlineCount=n;render()}});
   if(b("leave"))b("leave").onclick=leaveGame;
   if(b("rename"))b("rename").onclick=renameMe;
+  const inv=b("invname");if(inv)inv.addEventListener("input",e=>{myName=e.target.value});
+  document.querySelectorAll("[data-invtok]").forEach(el=>el.onclick=()=>{const n=b("invname");if(n)myName=n.value;myTk=+el.dataset.invtok;try{localStorage.setItem("gj-tok",String(myTk))}catch(e){}render()});
+  if(b("invgo"))b("invgo").onclick=()=>{const n=b("invname"),nm=clean(n?n.value:myName);if(!nm){netMsg="Escribe tu nombre para entrar.";render();if(b("invname"))b("invname").focus();return}
+    myName=nm;try{localStorage.setItem("gj-name",nm);localStorage.setItem("gj-tok",String(myTk))}catch(e){}const c=inviteCode;inviteCode=null;netMsg="";joinOnline(c)};
+  if(b("invno"))b("invno").onclick=()=>{inviteCode=null;netMsg="";try{history.replaceState(null,"",location.pathname+location.search)}catch(e){}render()};
   if(b("retry"))b("retry").onclick=()=>{const c=code;netMsg="";if(room){try{room.leave()}catch(e){}room=null}joinOnline(c)};
   if(b("bell"))b("bell").onclick=toggleBell;
   const dd=b("die");if(dd&&dd.classList.contains("ready")){dd.onclick=rollClick;dd.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();rollClick()}}}
@@ -997,8 +1017,8 @@ function start(){
   const h=(location.hash||"").slice(1).toLowerCase();
   const isCode=/^(\d{3}|[a-z0-9]{4,8})$/.test(h);
   if(isCode){tab="online";joinCode=h}
-  render();
-  if(isCode)joinOnline(h);
+  if(isCode&&myName&&loadLocal(KEY+"-host-"+h)){render();joinOnline(h)}
+  else{if(isCode)inviteCode=h;render()}
 }
 start();
 
