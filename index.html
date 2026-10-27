@@ -239,8 +239,8 @@ svg.board{width:100%;height:auto;display:block}
  <filter id="tksh" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="1.5" stdDeviation="1.4" flood-color="#000" flood-opacity=".6"/></filter>
 </defs></svg>
 
-<script src="config.js?v=1793037405"></script>
-<script src="net.js?v=1793037405"></script>
+<script src="config.js?v=1793139166"></script>
+<script src="net.js?v=1793139166"></script>
 <script>
 const ART_URL=location.origin+location.pathname;
 const PARTY={VOX:"Vox",PP:"PP",PSOE:"PSOE",IZQ:"Frente Amplio / Podemos"};
@@ -511,6 +511,10 @@ function myTurn(){if(!S||!S.players.length)return false;if(ROLE==="local")return
 function rnd6(){return Math.floor(Math.random()*6)}
 function newPlayer(n,id,k,tk){return {n:clean(n)||"Jugador "+(k+1),id,tk:(tk>=0&&tk<NTOK)?tk:k,pos:START[k],w:[0,0,0,0,0,0],ok:0,tot:0}}
 function pct(p){return p&&p.tot?Math.round(100*p.ok/p.tot)+" %":"0 %"}
+/* género por el nombre (primer nombre); si no se sabe, masculino genérico */
+const NOMF=new Set("maría maria ana lucía lucia carmen laura marta sara paula elena isabel cristina raquel patricia rosa pilar sofía sofia julia irene alba nuria silvia mónica monica beatriz eva inés ines noelia rocío rocio sonia andrea claudia carla natalia teresa lorena susana yolanda begoña montse montserrat mercedes dolores lola concha merche amparo consuelo esther ester miriam nerea ainhoa leire maite itziar iratxe idoia olatz uxue nagore aitana carolina victoria gloria belén belen macarena esperanza soledad inmaculada encarna rebeca alicia ángela angela lidia alejandra valeria daniela martina emma noa lara vega celia judith ruth rut cayetana reyes nieves araceli jessica vanessa tamara débora marina olga adriana gemma fátima fatima yasmina aurora josefa juana francisca antonia manuela ione ada mar sol luz pepa conchi puri maribel mamen marisa marisol iria uxía xiana sabela aroa abril triana candela jimena ximena chloe zoe alma olivia mía mia isa bea cris marga ángeles angeles remedios milagros ascensión pili charo lourdes cati xènia mireia meritxell núria montserrat roser neus anna laia aina jana berta clara".split(" ")),NOMM=new Set("josé jose juan antonio manuel francisco david javier daniel carlos jesús jesus alejandro miguel rafael pedro pablo ángel angel sergio fernando luis jorge alberto álvaro alvaro diego adrián adrian raúl raul enrique ramón ramon vicente iván ivan rubén ruben oscar óscar andrés andres joaquín joaquin santiago víctor victor eduardo roberto jaime mario marcos ignacio alfonso jordi salvador ricardo emilio gabriel julián julian julio tomás tomas agustín agustin mariano felipe gonzalo hugo lucas martín martin mateo leo nicolás nicolas iker unai aitor mikel gorka xabier iñaki borja nacho pepe paco quique toni xavi pau marc pol arnau oriol ernest josep joan xosé xoán brais santi abel adolfo leopoldo alfredo gaspar cayo íñigo inigo alexis ander asier jon koldo patxi txema isidro cristóbal baltasar esteban germán guillermo héctor hector israel jacobo lorenzo marcelino noé rodrigo samuel sebastián teodoro ulises valentín gerardo luca andreu jaume biel sisco quim albert àlex alex dani manu fran rafa chema josemi".split(" "));
+function gen(n){const w=String(n||"").trim().toLowerCase().split(/[\s,.-]+/)[0]||"";if(NOMF.has(w))return "f";if(NOMM.has(w))return "m";if(/a$/.test(w)&&w.length>2)return "f";return "m"}
+function G(n,m,f){return gen(n)==="f"?f:m}
 function TK(k){const p=S&&S.players[k];return p&&p.tk>=0&&p.tk<NTOK?p.tk:k}
 function freeTok(pref,except){const used=S?S.players.filter(p=>p!==except).map((p,k)=>p.tk):[];if(pref>=0&&pref<NTOK&&!used.includes(pref))return pref;for(let t=0;t<NTOK;t++)if(!used.includes(t))return t;return 0}
 let setupTok=[0,1,2,3];
@@ -719,7 +723,7 @@ async function leaveGame(){
 function homeHTML(){
   const saved=loadLocal(KEY);const net=lobbyRoom!==null;
   return `<section class="panel">
-    <div class="tabs" role="tablist"><button role="tab" id="tlocal" aria-selected="${tab==="local"}">En este móvil</button><button role="tab" id="tonline" aria-selected="${tab==="online"}">Online con amigos</button></div>
+    <div class="tabs" role="tablist"><button role="tab" id="tlocal" aria-selected="${tab==="local"}">En este dispositivo</button><button role="tab" id="tonline" aria-selected="${tab==="online"}">Online</button></div>
     ${tab==="local"?`
     <div class="tag">Jugadores</div>
     <div class="cnt" role="group" aria-label="Número de jugadores">${[1,2,3,4].map(n=>`<button id="n${n}" aria-pressed="${n===setupCount}">${n}</button>`).join("")}</div>
@@ -778,7 +782,7 @@ function lobbyHTML(){
     <div class="tag">Jugadores (${S.players.length}/${S.need||4})</div>
     <p class="msg">${S.players.length<(S.need||4)?`Faltan ${(S.need||4)-S.players.length}. La partida empezará sola cuando se unan todos.`:"¡Ya estáis todos!"}</p>
     ${(()=>{const me=S.players.find(p=>p.id===CID);if(!me)return "";const taken={};S.players.forEach(p=>{if(p!==me)taken[p.tk]=p.n});return `<div class="tag">Elige tu ficha</div>${tokPicker(me.tk,taken,"data-mytok")}`})()}
-    <div class="players">${S.players.map((q,k)=>`<div class="pl"><span>${tokIcon(TK(k),32,labs()[k])}</span><span class="nm">${esc(q.n)}${q.id===CID?" (tú)":""}<small>${k===0?"Anfitrión":"Jugador"}</small></span></div>`).join("")}</div>
+    <div class="players">${S.players.map((q,k)=>`<div class="pl"><span>${tokIcon(TK(k),32,labs()[k])}</span><span class="nm">${esc(q.n)}${q.id===CID?" (tú)":""}<small>${k===0?G(q.n,"Anfitrión","Anfitriona"):G(q.n,"Jugador","Jugadora")}</small></span></div>`).join("")}</div>
     ${host?(S.players.length>=2?`<div class="row"><button class="btn ghost" id="start">Empezar ya con ${S.players.length}</button></div>`:""):`<p class="note">Esperando al resto de jugadores…</p>`}
     ${!host&&!hostHere?`<p class="note">El anfitrión no aparece conectado ahora mismo.</p>`:""}
     ${netMsg?`<p class="msg" role="status">${esc(netMsg)}</p>`:""}
@@ -793,7 +797,7 @@ function gameHTML(){
   else if(S.phase==="roll")ctrl=has6(p)&&p.pos===C?`<button class="btn fosfo" id="final">♛ Ir a la audiencia con el Rey</button>`:`<p class="msg">Toca el dado para tirar.</p>`;
   else if(S.phase==="move")ctrl=`<p class="msg">Toca una de las casillas iluminadas del tablero.</p>`;
   const online=ROLE!=="local";
-  return `${online?`<div class="netbar"><span>Online · código <b>${esc(code.toUpperCase())}</b></span>${ROLE==="guest"&&!hostHere?`<span class="warn">Anfitrión desconectado</span>`:""}<button class="mini bell" id="bell" aria-pressed="${alertsOn}" title="Avisos de turno">${alertsOn?"🔔 Avisos":"🔕 Avisos"}</button><a class="mini" href="${waLink()}" target="_blank" rel="noopener">Invitar</a></div>`:""}
+  return `${online?`<div class="netbar"><span>Online · código <b>${esc(code.toUpperCase())}</b></span>${ROLE==="guest"&&!hostHere?`<span class="warn">${G(S.players[0]&&S.players[0].n,"Anfitrión desconectado","Anfitriona desconectada")}</span>`:""}<button class="mini bell" id="bell" aria-pressed="${alertsOn}" title="Avisos de turno">${alertsOn?"🔔 Avisos":"🔕 Avisos"}</button><a class="mini" href="${waLink()}" target="_blank" rel="noopener">Invitar</a></div>`:""}
   <section class="panel">
     <div class="boardwrap">${boardSVG()}</div>
     <div class="turn"><div class="tleft">${tokIcon(TK(S.turn),40,L[S.turn])}<span class="who">${esc(p.n)}${online&&p.id===CID?" (tú)":""}<span class="tname">Es su turno</span></span></div><div class="tmid">${pie3d(p.w,`${p.w.filter(Boolean).length} de 6 quesitos`)}</div><div class="tright">${dieHTML(S.roll,mine&&!pending&&S.phase==="roll"&&!(has6(p)&&p.pos===C))}</div></div>
@@ -987,7 +991,7 @@ function playFx(f){
     fxEl.innerHTML=`<div class="fx-card" role="dialog" aria-modal="true" aria-labelledby="kt">
       <div class="crown" aria-hidden="true">${crownSVG(110)}</div>
       <div class="tag" style="color:#ffd84a">Audiencia en el Palacio de la Zarzuela</div>
-      <div class="speech" id="kt"><b>S. M. el Rey Felipe VI:</b> «${esc(who)}, para llegar a La Moncloa tendrás que responder bien al menos 4 de estas 6 preguntas seguidas. Mucha suerte.»</div>
+      <div class="speech" id="kt"><b>S. M. el Rey Felipe VI:</b> «${G(who,"Estimado","Estimada")} ${esc(who)}, para llegar a La Moncloa tendrás que responder bien al menos 4 de estas 6 preguntas seguidas. Mucha suerte.»</div>
       <button class="btn fosfo" id="kgo">¡Adelante!</button></div>`;
     fxEl.hidden=false;fxEl.onclick=null;document.getElementById("kgo").onclick=closeFx;document.getElementById("kgo").focus({preventScroll:true});
     return;
@@ -1000,7 +1004,7 @@ function playFx(f){
       <div class="fx-crown">${tokIcon(TK(f.who),96,labs()[f.who])}</div>
       <div class="fx-name">${esc(who)}</div>
       <div class="flag" aria-hidden="true"><i></i><i></i><i></i></div>
-      <div class="fx-pres">¡Enhorabuena al nuevo Presidente del Gobierno de España!</div>
+      <div class="fx-pres">${G(p.n,"¡Enhorabuena al nuevo Presidente del Gobierno de España!","¡Enhorabuena a la nueva Presidenta del Gobierno de España!")}</div>
       <div class="fx-who">6 quesitos · ${p.ok} aciertos de ${p.tot} (${pct(p)}) · La Moncloa te espera</div>
       <div class="row" style="justify-content:center"><button class="btn light" id="fxclose">Ver el tablero</button>${ROLE==="guest"?"":`<button class="btn fosfo" id="fxnew">Nueva partida</button>`}</div>
     </div>`;
